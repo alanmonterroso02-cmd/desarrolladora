@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Mi Carrito | Asociación Tecnológica Monterroso</title>
+
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../css/tienda.css">
+
+</head>
+
+<body>
+
+  <!-- BARRA -->
+  <header class="barra">
+    <div class="contenedor">
+
+      <a href="../pages/tienda.html" class="barra-marca">
+        Asociación Tecnológica Monterroso
+        <small>Mi carrito</small>
+      </a>
+
+      <div class="barra-acciones">
+        <a href="../pages/tienda.html" class="barra-enlace">Seguir comprando</a>
+        <a href="carrito.html" class="carrito-boton">
+          Carrito
+          <span id="contador-carrito" class="contador">0</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ENCABEZADO -->
+  <div class="contenedor">
+    <div class="pagina-cabecera">
+      <h1>Mi Carrito</h1>
+      <p>Revisa y ajusta las cantidades antes de finalizar tu pedido.</p>
+    </div>
+  </div>
+
+  <!-- CARRITO -->
+  <main class="contenedor">
+    <div id="itemsCarrito"></div>
+
+    <div class="resumen-carrito">
+      <h3>Total: <span id="totalCompra">Q0</span></h3>
+      <a href="checkout.html" class="btn">Continuar con el pedido</a>
+    </div>
+  </main>
+
+  <footer class="pie">
+    © 2026 Asociación Tecnológica Monterroso | Todos los derechos reservados
+  </footer>
+
+  <script type="module" src="../js/ver_carrito.js"></script>
+
+</body>
+
+</html>

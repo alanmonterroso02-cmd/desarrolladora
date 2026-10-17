@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Productos | Administrador</title>
+
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+<body>
+
+  <!-- BARRA LATERAL -->
+  <aside class="sidebar">
+
+    <div class="marca">
+      Asoc. Tecnológica
+      <small>Monterroso · Admin</small>
+    </div>
+
+    <a href="dashboard.html">Dashboard</a>
+    <a href="productos.html" class="activo">Productos</a>
+    <a href="inventario.html">Inventario</a>
+    <a href="ventas.html">Ventas</a>
+    <a href="clientes.html">Clientes</a>
+
+    <hr>
+
+    <a href="#" data-salir>Salir</a>
+
+  </aside>
+
+  <!-- PRINCIPAL -->
+  <div class="principal">
+
+    <div class="topbar">
+      <h1>Gestión de Productos</h1>
+      <span class="usuario" id="usuarioActual">Administrador</span>
+    </div>
+
+    <div class="zona">
+
+      <div class="rejilla rejilla-2">
+
+        <!-- FORMULARIO -->
+        <div class="tarjeta">
+
+          <h2 class="titulo-seccion" style="margin-top:0" id="tituloForm">
+            Nuevo producto
+          </h2>
+
+          <form id="productoForm">
+
+            <div class="campo">
+              <label for="imagen">Imagen (se comprime automáticamente)</label>
+              <input type="file" id="imagen" accept="image/*">
+              <img id="vistaImagen" class="vista-imagen" alt="Vista previa">
+            </div>
+
+            <div class="campo">
+              <label for="nombre">Nombre</label>
+              <input type="text" id="nombre" placeholder="Ej: Robot Omnidireccional" required>
+            </div>
+
+            <div class="campo">
+              <label for="categoria">Categoría</label>
+              <select id="categoria">
+                <option>Robótica</option>
+                <option>Automatización e IoT</option>
+                <option>Desarrollo de Software</option>
+                <option>Videovigilancia</option>
+                <option>Inteligencia Artificial</option>
+                <option>Electrónica</option>
+                <option>Diseño 3D</option>
+                <option>Otros</option>
+              </select>
+            </div>
+
+            <div class="campo">
+              <label for="precio">Precio (Q)</label>
+              <input type="number" id="precio" min="0" step="0.01" placeholder="0.00" required>
+            </div>
+
+            <div class="campo">
+              <label for="stock">Inventario</label>
+              <input type="number" id="stock" min="0" placeholder="Cantidad" required>
+            </div>
+
+            <div class="campo">
+              <label for="descripcion">Descripción</label>
+              <textarea id="descripcion" placeholder="Descripción del producto"></textarea>
+            </div>
+
+            <div class="campo">
+              <label>
+                <input type="checkbox" id="personalizable" style="width:auto;margin-right:8px">
+                Producto personalizable
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-ancho">Guardar producto</button>
+            <button type="button" id="btnCancelar" class="btn btn-gris btn-ancho"
+                    style="display:none;margin-top:10px">Cancelar edición</button>
+
+          </form>
+
+        </div>
+
+        <!-- TABLA -->
+        <div class="tarjeta">
+
+          <h2 class="titulo-seccion" style="margin-top:0">Productos registrados</h2>
+
+          <div class="campo">
+            <input type="text" id="buscarProducto" placeholder="Buscar producto…">
+          </div>
+
+          <div class="tabla-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Imagen</th>
+                  <th>Producto</th>
+                  <th>Precio</th>
+                  <th>Stock</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="listaProductos">
+                <tr><td colspan="5" class="mini">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module" src="js/productos.js"></script>
+
+</body>
+
+</html>

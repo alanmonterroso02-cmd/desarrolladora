@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Dashboard | Administrador</title>
+
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+<body>
+
+  <!-- BARRA LATERAL -->
+  <aside class="sidebar">
+
+    <div class="marca">
+      Asoc. Tecnológica
+      <small>Monterroso · Admin</small>
+    </div>
+
+    <a href="dashboard.html" class="activo">Dashboard</a>
+    <a href="productos.html">Productos</a>
+    <a href="inventario.html">Inventario</a>
+    <a href="ventas.html">Ventas</a>
+    <a href="clientes.html">Clientes</a>
+
+    <hr>
+
+    <a href="#" data-salir>Salir</a>
+
+  </aside>
+
+  <!-- PRINCIPAL -->
+  <div class="principal">
+
+    <div class="topbar">
+      <h1>Resumen General</h1>
+      <span class="usuario" id="usuarioActual">Administrador</span>
+    </div>
+
+    <div class="zona">
+
+      <div class="rejilla rejilla-4">
+
+        <div class="tarjeta">
+          <h3>Pedidos pendientes</h3>
+          <div class="numero" id="pedidosPendientes">0</div>
+          <div class="nota">Por confirmar / entregar</div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Ventas de hoy</h3>
+          <div class="numero" id="ventasHoy">Q0</div>
+          <div class="nota">Total del día</div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Productos</h3>
+          <div class="numero" id="totalProductos">0</div>
+          <div class="nota">Registrados en el catálogo</div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Clientes</h3>
+          <div class="numero" id="totalClientes">0</div>
+          <div class="nota">Usuarios registrados</div>
+        </div>
+
+      </div>
+
+      <h2 class="titulo-seccion">Productos con poco inventario</h2>
+
+      <div class="tarjeta">
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaInventario">
+              <tr><td colspan="3" class="mini">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h2 class="titulo-seccion">Acciones rápidas</h2>
+
+      <div class="rejilla rejilla-2">
+        <a href="productos.html" class="btn">+ Agregar producto</a>
+        <a href="inventario.html" class="btn btn-gris">Revisar inventario</a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module" src="js/dashboard.js"></script>
+
+</body>
+
+</html>
