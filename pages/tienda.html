@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Productos Personalizados | Asociación Tecnológica Monterroso</title>
+
+  <meta name="description" content="Catálogo de productos personalizados de la Asociación Tecnológica Monterroso: robótica, automatización, software y más.">
+
+  <!-- Acelera la conexión con Firebase -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../css/tienda.css">
+
+</head>
+
+<body>
+
+  <!-- BARRA -->
+  <header class="barra">
+    <div class="contenedor">
+
+      <a href="../index.html" class="barra-marca">
+        Asociación Tecnológica Monterroso
+        <small>Productos Personalizados</small>
+      </a>
+
+      <div class="barra-acciones">
+        <a href="../index.html" class="barra-enlace">Inicio</a>
+        <a href="../tienda/carrito.html" class="carrito-boton">
+          Carrito
+          <span id="contador-carrito" class="contador">0</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ENCABEZADO -->
+  <div class="contenedor">
+    <div class="pagina-cabecera">
+      <h1>Productos Personalizados</h1>
+      <p>
+        Explora nuestro catálogo. Cada producto puede adaptarse a tus
+        necesidades: escríbenos al finalizar tu pedido y lo personalizamos.
+      </p>
+    </div>
+  </div>
+
+  <!-- CATÁLOGO -->
+  <main class="contenedor">
+    <div id="estadoCatalogo"></div>
+    <div id="listaProductos"></div>
+  </main>
+
+  <!-- MODAL DE DETALLE -->
+  <div class="modal" id="modal">
+    <div class="modal-caja" id="modalContenido"></div>
+  </div>
+
+  <footer class="pie">
+    © 2026 Asociación Tecnológica Monterroso | Todos los derechos reservados
+  </footer>
+
+  <script type="module" src="../js/tienda.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Inventario | Administrador</title>
+
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+<body>
+
+  <!-- BARRA LATERAL -->
+  <aside class="sidebar">
+
+    <div class="marca">
+      Asoc. Tecnológica
+      <small>Monterroso · Admin</small>
+    </div>
+
+    <a href="dashboard.html">Dashboard</a>
+    <a href="productos.html">Productos</a>
+    <a href="inventario.html" class="activo">Inventario</a>
+    <a href="ventas.html">Ventas</a>
+    <a href="clientes.html">Clientes</a>
+
+    <hr>
+
+    <a href="#" data-salir>Salir</a>
+
+  </aside>
+
+  <!-- PRINCIPAL -->
+  <div class="principal">
+
+    <div class="topbar">
+      <h1>Control de Inventario</h1>
+      <span class="usuario" id="usuarioActual">Administrador</span>
+    </div>
+
+    <div class="zona">
+
+      <div class="tarjeta">
+
+        <div class="campo">
+          <input type="text" id="buscarInventario" placeholder="Buscar producto…">
+        </div>
+
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Imagen</th>
+                <th>Producto</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>+1</th>
+                <th>−1</th>
+                <th>Fijar</th>
+              </tr>
+            </thead>
+            <tbody id="tablaInventario">
+              <tr><td colspan="7" class="mini">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module" src="js/inventario.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Ventas | Administrador</title>
+
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+<body>
+
+  <!-- BARRA LATERAL -->
+  <aside class="sidebar">
+
+    <div class="marca">
+      Asoc. Tecnológica
+      <small>Monterroso · Admin</small>
+    </div>
+
+    <a href="dashboard.html">Dashboard</a>
+    <a href="productos.html">Productos</a>
+    <a href="inventario.html">Inventario</a>
+    <a href="ventas.html" class="activo">Ventas</a>
+    <a href="clientes.html">Clientes</a>
+
+    <hr>
+
+    <a href="#" data-salir>Salir</a>
+
+  </aside>
+
+  <!-- PRINCIPAL -->
+  <div class="principal">
+
+    <div class="topbar">
+      <h1>Control de Ventas</h1>
+      <span class="usuario" id="usuarioActual">Administrador</span>
+    </div>
+
+    <div class="zona">
+
+      <div class="rejilla rejilla-4">
+
+        <div class="tarjeta">
+          <h3>Pendientes</h3>
+          <div class="numero" id="totalPendientes">0</div>
+          <div class="nota">Pedidos sin comenzar</div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Trabajados</h3>
+          <div class="numero" id="totalTrabajados">0</div>
+          <div class="nota">Pedidos en proceso</div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Entregados</h3>
+          <div class="numero" id="totalEntregados">0</div>
+          <div class="nota">Pedidos completados</div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Total vendido</h3>
+          <div class="numero" id="totalVendido">Q0</div>
+          <div class="nota">Solo pedidos entregados</div>
+        </div>
+
+      </div>
+
+      <h2 class="titulo-seccion">Pedidos</h2>
+
+      <div class="tarjeta">
+
+        <div class="rejilla rejilla-2" style="margin-bottom:18px">
+          <div class="campo" style="margin:0">
+            <select id="filtroEstado">
+              <option value="todos">Todos los estados</option>
+              <option value="Pendiente">Pendientes</option>
+              <option value="Trabajado">Trabajados</option>
+              <option value="Entregado">Entregados</option>
+              <option value="Cancelado">Cancelados</option>
+            </select>
+          </div>
+          <div class="campo" style="margin:0">
+            <input type="text" id="buscarVenta" placeholder="Buscar por cliente…">
+          </div>
+        </div>
+
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Contacto</th>
+                <th>Productos</th>
+                <th>Total</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaVentas">
+              <tr><td colspan="7" class="mini">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module" src="js/ventas.js"></script>
+
+</body>
+
+</html>

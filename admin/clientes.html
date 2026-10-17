@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Clientes | Administrador</title>
+
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+<body>
+
+  <!-- BARRA LATERAL -->
+  <aside class="sidebar">
+
+    <div class="marca">
+      Asoc. Tecnológica
+      <small>Monterroso · Admin</small>
+    </div>
+
+    <a href="dashboard.html">Dashboard</a>
+    <a href="productos.html">Productos</a>
+    <a href="inventario.html">Inventario</a>
+    <a href="ventas.html">Ventas</a>
+    <a href="clientes.html" class="activo">Clientes</a>
+
+    <hr>
+
+    <a href="#" data-salir>Salir</a>
+
+  </aside>
+
+  <!-- PRINCIPAL -->
+  <div class="principal">
+
+    <div class="topbar">
+      <h1>Clientes Registrados</h1>
+      <span class="usuario" id="usuarioActual">Administrador</span>
+    </div>
+
+    <div class="zona">
+
+      <div class="tarjeta">
+
+        <p class="mini" style="margin-bottom:15px">
+          Clientes: <strong id="totalClientes">0</strong>
+        </p>
+
+        <div class="campo">
+          <input type="text" id="buscarCliente" placeholder="Buscar por nombre, correo o teléfono…">
+        </div>
+
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Registro</th>
+              </tr>
+            </thead>
+            <tbody id="tablaClientes">
+              <tr><td colspan="5" class="mini">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module" src="js/clientes.js"></script>
+
+</body>
+
+</html>
