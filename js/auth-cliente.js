@@ -94,6 +94,56 @@ async function registrarCliente(usuario) {
 }
 
 // ------------------------------------------------------------
+//  Guarda/actualiza los datos del cliente en Firestore (merge).
+//  Al confirmar un pedido se usa para no perder el teléfono ni
+//  la dirección que el cliente escribió.
+// ------------------------------------------------------------
+
+export async function guardarDatosCliente(usuario, datos = {}) {
+
+  if (!usuario) return;
+
+  const campos = {
+    nombre: usuario.displayName || "",
+    correo: usuario.email || "",
+    foto: usuario.photoURL || "",
+    ultimaVisita: serverTimestamp()
+  };
+
+  if (datos.telefono) {
+    campos.telefono = String(datos.telefono).trim();
+  }
+
+  if (datos.direccion) {
+    campos.direccion = String(datos.direccion).trim();
+  }
+
+  if (datos.compra) {
+    campos.ultimaCompra = serverTimestamp();
+  }
+
+  await setDoc(doc(db, "clientes", usuario.uid), campos, { merge: true });
+}
+
+// ------------------------------------------------------------
+//  Lee los datos ya guardados del cliente (para rellenar el
+//  formulario la próxima vez).
+// ------------------------------------------------------------
+
+export async function obtenerDatosCliente(uid) {
+
+  if (!uid) return null;
+
+  try {
+    const snap = await getDoc(doc(db, "clientes", uid));
+    return snap.exists() ? snap.data() : null;
+  } catch (error) {
+    console.error("No se pudieron leer los datos del cliente:", error);
+    return null;
+  }
+}
+
+// ------------------------------------------------------------
 //  Si venimos de un login por redirect, lo completamos al cargar.
 // ------------------------------------------------------------
 

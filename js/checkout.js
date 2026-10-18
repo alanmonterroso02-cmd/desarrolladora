@@ -23,7 +23,7 @@ import { obtenerCarrito, vaciar } from "./carrito.js";
 import { mapaProductos, mapaProductosFrescos } from "./productos.js";
 import { avisarAdmin } from "./notificar-whatsapp.js";
 import { precio, aviso, escapar } from "./comun.js";
-import { iniciarSesionCliente, completarLoginRedirect } from "./auth-cliente.js";
+import { iniciarSesionCliente, completarLoginRedirect, guardarDatosCliente, obtenerDatosCliente } from "./auth-cliente.js";
 
 const formulario = document.getElementById("formCompra");
 const totalEl = document.getElementById("totalCompra");
@@ -114,10 +114,27 @@ async function refrescarCompra() {
 // ------------------------------------------------------------
 
 async function autocompletarConUsuario(usuario) {
+
   if (!usuario) return;
+
   const nombre = document.getElementById("nombre");
   if (usuario.displayName && !nombre.value) {
     nombre.value = usuario.displayName;
+  }
+
+  // Teléfono y dirección que ya usó en un pedido anterior.
+  const guardado = await obtenerDatosCliente(usuario.uid);
+  if (!guardado) return;
+
+  const telefonoEl = document.getElementById("telefono");
+  const direccionEl = document.getElementById("direccion");
+
+  if (guardado.telefono && !telefonoEl.value) {
+    telefonoEl.value = guardado.telefono;
+  }
+
+  if (guardado.direccion && !direccionEl.value) {
+    direccionEl.value = guardado.direccion;
   }
 }
 
@@ -324,6 +341,18 @@ formulario.addEventListener("submit", async (e) => {
       fecha: serverTimestamp(),
       estado: "Pendiente"
     });
+
+    // 1b. Guardar el teléfono (y la dirección) en el registro del
+    //     cliente, junto con su correo. No bloquea el pedido.
+    try {
+      await guardarDatosCliente(usuario, {
+        telefono: telefono,
+        direccion: direccion,
+        compra: true
+      });
+    } catch (err) {
+      console.error("No se pudieron guardar los datos del cliente:", err);
+    }
 
     // 2. Descontar inventario de forma atómica.
     //    ⚠️ Si cierras las reglas de Firestore (recomendado, ver

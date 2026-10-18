@@ -105,7 +105,8 @@ Entra por `admin/login.html` con el usuario que creaste en
 - Ver y actualizar el estado de cada pedido. Los estados son:
   **Pendiente** (sin comenzar) → **Trabajado** (en proceso) →
   **Entregado** (completado), y **Cancelado** (anulado).
-- Ver los clientes registrados.
+- Ver los clientes registrados con su **correo y teléfono** (el teléfono
+  se guarda solo cuando el cliente hace su primer pedido).
 
 ---
 

@@ -81,7 +81,7 @@ No hay que crearlas a mano. El sitio usa:
 | Colección | Qué guarda |
 |---|---|
 | `productos` | Cada producto del catálogo |
-| `clientes` | Cada cliente que inició sesión con Google |
+| `clientes` | Cada cliente que inició sesión con Google (nombre, correo y, al primer pedido, su teléfono) |
 | `ventas` | Cada pedido hecho desde el checkout |
 
 ## 6. Probar
