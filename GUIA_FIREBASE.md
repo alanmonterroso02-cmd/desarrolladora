@@ -64,6 +64,15 @@ const firebaseConfig = {
 4. Pestaña **"Users"** → **"Agregar usuario"**: crea tu usuario y
    contraseña de administrador. Con esos datos entrarás a
    `admin/login.html`.
+5. Pestaña **"Settings"** → **"Authorized domains"** (Dominios
+   autorizados): agrega el dominio donde publicas el sitio, por ejemplo
+   `alanmonterroso02-cmd.github.io`.
+
+   > 🔴 **Sin este paso el login con Google falla** en el sitio
+   > publicado, con el error *"This domain is not authorized for OAuth
+   > operations"*. La tienda exige iniciar sesión con Google para
+   > confirmar un pedido, así que si falta el dominio nadie podrá
+   > comprar.
 
 ## 5. Colecciones (se crean solas)
 

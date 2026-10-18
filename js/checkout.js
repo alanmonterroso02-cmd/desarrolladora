@@ -3,7 +3,7 @@
 //  Asociación Tecnológica Monterroso
 // ============================================================
 
-import { db, firebaseConfigurado } from "../firebase/firebase-config.js";
+import { auth, db, firebaseConfigurado } from "../firebase/firebase-config.js";
 
 import {
   collection,
@@ -14,16 +14,22 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 import { obtenerCarrito, vaciar } from "./carrito.js";
 import { mapaProductos, mapaProductosFrescos } from "./productos.js";
 import { avisarAdmin } from "./notificar-whatsapp.js";
-import { precio, aviso } from "./comun.js";
+import { precio, aviso, escapar } from "./comun.js";
 import { iniciarSesionCliente, completarLoginRedirect } from "./auth-cliente.js";
 
 const formulario = document.getElementById("formCompra");
 const totalEl = document.getElementById("totalCompra");
 const botonGoogle = document.getElementById("btnGoogle");
 const botonConfirmar = document.getElementById("btnConfirmar");
+const sesionEl = document.getElementById("sesionCliente");
 
 let productosCompra = [];
 let total = 0;
@@ -115,6 +121,90 @@ async function autocompletarConUsuario(usuario) {
   }
 }
 
+// ------------------------------------------------------------
+//  Sesión obligatoria con Google
+//  El pedido no se puede confirmar sin iniciar sesión: así queda
+//  registrado quién compró (correo) y se evitan pedidos falsos.
+// ------------------------------------------------------------
+
+function restaurarBoton() {
+
+  if (!botonConfirmar) return;
+
+  delete botonConfirmar.dataset.enviando;
+  botonConfirmar.textContent = "Confirmar pedido";
+  actualizarBotonConfirmar();
+}
+
+function actualizarBotonConfirmar() {
+
+  if (!botonConfirmar) return;
+
+  // Mientras se envía el pedido no tocamos el botón.
+  if (botonConfirmar.dataset.enviando === "1") return;
+
+  const haySesion = !!auth.currentUser;
+
+  botonConfirmar.disabled = !haySesion;
+  botonConfirmar.title = haySesion
+    ? ""
+    : "Inicia sesión con Google para confirmar el pedido";
+}
+
+function pintarSesion(usuario) {
+
+  if (sesionEl) {
+
+    if (usuario) {
+
+      const nombre = usuario.displayName || usuario.email || "cliente";
+
+      sesionEl.innerHTML = `
+        <div class="sesion-caja sesion-ok">
+          <span>
+            Sesión iniciada como
+            <strong>${escapar(nombre)}</strong>
+          </span>
+          <button type="button" id="btnCambiarCuenta" class="btn-enlace">
+            Cambiar cuenta
+          </button>
+        </div>`;
+
+      const cambiar = document.getElementById("btnCambiarCuenta");
+
+      if (cambiar) {
+        cambiar.addEventListener("click", async () => {
+          await signOut(auth);
+          aviso("Sesión cerrada");
+        });
+      }
+
+    } else {
+
+      sesionEl.innerHTML = `
+        <div class="sesion-caja sesion-pendiente">
+          Para confirmar el pedido necesitas
+          <strong>iniciar sesión con Google</strong>.
+        </div>`;
+    }
+  }
+
+  if (botonGoogle) {
+    botonGoogle.style.display = usuario ? "none" : "";
+  }
+
+  actualizarBotonConfirmar();
+}
+
+// Se actualiza sola al entrar o salir de la cuenta.
+onAuthStateChanged(auth, (usuario) => {
+  pintarSesion(usuario);
+  if (usuario) autocompletarConUsuario(usuario);
+});
+
+// Estado inicial (puede ser null mientras se restaura la sesión).
+pintarSesion(auth.currentUser);
+
 if (botonGoogle) {
   botonGoogle.addEventListener("click", async () => {
 
@@ -133,11 +223,26 @@ if (botonGoogle) {
         aviso("Sesión iniciada con Google");
       }
     } catch (error) {
+
       console.error(error);
-      aviso("No se pudo iniciar sesión", "error");
+
+      if (error.code === "auth/unauthorized-domain") {
+        aviso(
+          "El login con Google no está autorizado en este dominio. " +
+          "Avisa al administrador.",
+          "error"
+        );
+      } else if (error.code === "auth/popup-closed-by-user") {
+        aviso("Cerraste la ventana de Google", "info");
+      } else if (error.code === "auth/network-request-failed") {
+        aviso("Sin conexión: revisa tu internet", "error");
+      } else {
+        aviso("No se pudo iniciar sesión", "error");
+      }
+
     } finally {
       botonGoogle.disabled = false;
-      botonGoogle.textContent = "Continuar con Google (opcional)";
+      botonGoogle.textContent = "Iniciar sesión con Google";
     }
   });
 }
@@ -158,6 +263,14 @@ formulario.addEventListener("submit", async (e) => {
     return;
   }
 
+  // El pedido exige sesión: se guarda quién compró.
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    aviso("Inicia sesión con Google para confirmar el pedido", "error");
+    return;
+  }
+
   if (!productosCompra.length) {
     aviso("Tu carrito está vacío", "error");
     return;
@@ -168,6 +281,7 @@ formulario.addEventListener("submit", async (e) => {
   const direccion = document.getElementById("direccion").value.trim();
   const notas = document.getElementById("notas").value.trim();
 
+  botonConfirmar.dataset.enviando = "1";
   botonConfirmar.disabled = true;
   botonConfirmar.textContent = "Enviando pedido…";
 
@@ -179,8 +293,7 @@ formulario.addEventListener("submit", async (e) => {
 
     if (!productosCompra.length) {
       aviso("Los productos de tu carrito ya no están disponibles", "error");
-      botonConfirmar.disabled = false;
-      botonConfirmar.textContent = "Confirmar pedido";
+      restaurarBoton();
       return;
     }
 
@@ -194,17 +307,18 @@ formulario.addEventListener("submit", async (e) => {
           sinStock.map((p) => p.nombre).join(", "),
         "error"
       );
-      botonConfirmar.disabled = false;
-      botonConfirmar.textContent = "Confirmar pedido";
+      restaurarBoton();
       return;
     }
 
-    // 1. Guardar el pedido
+    // 1. Guardar el pedido (con la cuenta de Google que lo hizo)
     await addDoc(collection(db, "ventas"), {
       cliente: nombre,
       telefono: telefono,
       direccion: direccion,
       notas: notas,
+      correo: usuario.email || "",
+      uid: usuario.uid,
       productos: productosCompra,
       total: total,
       fecha: serverTimestamp(),
@@ -233,6 +347,7 @@ formulario.addEventListener("submit", async (e) => {
     avisarAdmin(
       "🛒 Nuevo pedido\n" +
       `Cliente: ${nombre}\n` +
+      `Cuenta Google: ${usuario.email || "-"}\n` +
       `Tel: ${telefono}\n` +
       `Dirección: ${direccion}\n` +
       `Productos: ${lista}\n` +
@@ -257,8 +372,7 @@ formulario.addEventListener("submit", async (e) => {
     console.error("Error creando el pedido:", error);
     aviso("No se pudo enviar el pedido. Intenta de nuevo.", "error");
 
-    botonConfirmar.disabled = false;
-    botonConfirmar.textContent = "Confirmar pedido";
+    restaurarBoton();
   }
 });
 

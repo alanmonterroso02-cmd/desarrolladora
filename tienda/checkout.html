@@ -55,8 +55,12 @@
 
     <form id="formCompra" class="formulario">
 
+      <div id="sesionCliente" class="sesion-cliente">
+        <p class="sesion-caja sesion-pendiente">Comprobando la sesión…</p>
+      </div>
+
       <button type="button" id="btnGoogle" class="btn btn-google">
-        Continuar con Google (opcional)
+        Iniciar sesión con Google
       </button>
 
       <div class="campo">
@@ -85,9 +89,13 @@
 
       <p class="total-checkout">Total: <span id="totalCompra">Q0</span></p>
 
-      <button type="submit" id="btnConfirmar" class="btn btn-ancho">
+      <button type="submit" id="btnConfirmar" class="btn btn-ancho" disabled>
         Confirmar pedido
       </button>
+
+      <p class="mini-checkout">
+        Para confirmar necesitas iniciar sesión con Google.
+      </p>
 
     </form>
 

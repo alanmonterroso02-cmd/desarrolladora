@@ -74,9 +74,10 @@ GUIA_FIREBASE.md               → Paso a paso para conectar Firebase
 ## Cómo funciona la tienda
 
 1. El cliente entra a `pages/tienda.html` y ve el catálogo por categorías.
-2. Agrega productos al carrito (no necesita iniciar sesión).
-3. En **Finalizar pedido** llena sus datos y, si lo desea, un campo de
-   **notas de personalización**.
+2. Agrega productos al carrito (no necesita iniciar sesión para esto).
+3. En **Finalizar pedido** debe **iniciar sesión con Google** — si no,
+   el botón *Confirmar pedido* queda bloqueado. Sus datos de contacto se
+   rellenan solos y el pedido queda asociado a su correo.
 4. Al confirmar: se vuelven a leer los **precios y el stock reales**
    desde Firestore (no se confía en la caché del celular), se guarda el
    pedido y llega un WhatsApp al administrador (si está configurado).

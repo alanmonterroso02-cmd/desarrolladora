@@ -1,11 +1,11 @@
 // ============================================================
-//  AUTH-CLIENTE.JS - Inicio de sesión con Google (opcional)
+//  AUTH-CLIENTE.JS - Inicio de sesión con Google
 //  Asociación Tecnológica Monterroso
 // ============================================================
 //
-//  Es OPCIONAL: se usa en el checkout para que el cliente pueda
-//  autocompletar sus datos y quede registrado en la colección
-//  "clientes". No se exige para comprar.
+//  Se usa en el checkout: el cliente DEBE iniciar sesión con
+//  Google para confirmar el pedido. Así queda registrado quién
+//  compró (correo) en la colección "clientes" y en cada venta.
 // ============================================================
 
 import { auth, db, firebaseConfigurado } from "../firebase/firebase-config.js";

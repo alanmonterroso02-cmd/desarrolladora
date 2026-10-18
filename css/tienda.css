@@ -525,6 +525,64 @@ body {
   background: #f1f1f1;
 }
 
+/* ---------- Sesión obligatoria (Google) ---------- */
+
+.sesion-cliente {
+  margin-bottom: 14px;
+}
+
+.sesion-caja {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 12px 15px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.sesion-pendiente {
+  background: rgba(255, 198, 0, 0.08);
+  border-color: rgba(255, 198, 0, 0.35);
+  color: #ffd77a;
+}
+
+.sesion-ok {
+  background: rgba(0, 191, 255, 0.08);
+  border-color: rgba(0, 191, 255, 0.35);
+  color: var(--texto-suave);
+}
+
+.sesion-ok strong {
+  color: #fff;
+}
+
+.btn-enlace {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--azul);
+  font-family: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.btn-enlace:hover {
+  color: var(--azul-oscuro);
+}
+
+.mini-checkout {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--texto-suave);
+  text-align: center;
+}
+
 .total-checkout {
   font-size: 20px;
   margin: 10px 0 18px;

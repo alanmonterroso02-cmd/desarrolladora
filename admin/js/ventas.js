@@ -115,7 +115,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     return `
       <tr>
-        <td><strong>${escapar(v.cliente || "-")}</strong></td>
+        <td>
+          <strong>${escapar(v.cliente || "-")}</strong>
+          ${v.correo ? `<br><span class="mini">${escapar(v.correo)}</span>` : ""}
+        </td>
         <td>
           ${escapar(v.telefono || "-")}<br>
           <span class="mini">${escapar(v.direccion || "-")}</span>
