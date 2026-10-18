@@ -13,8 +13,20 @@
 //  Más info: https://www.callmebot.com/blog/free-api-whatsapp-messages/
 // ============================================================
 
+// ⚠️ IMPORTANTE (seguridad):
+// La clave de CallMeBot se envía desde el navegador, así que CUALQUIER
+// persona que abra el sitio puede verla. La clave anterior estaba
+// publicada en GitHub y debe considerarse comprometida.
+//
+// Para reactivar el aviso automático:
+//   1. Genera una clave NUEVA (pasos de arriba).
+//   2. Pégala aquí abajo.
+//   3. Ten en cuenta que seguirá siendo visible para todo el mundo.
+//
+// Si prefieres no exponer ninguna clave, deja apikey vacía: los pedidos
+// igual llegan al panel de administración (Ventas) y al Dashboard.
 const DESTINATARIOS = [
-  { phone: "50248975506", apikey: "9341829" }
+  { phone: "50248975506", apikey: "" }
   // Puedes agregar más, por ejemplo:
   // { phone: "50212345678", apikey: "OTRA_APIKEY" }
 ];

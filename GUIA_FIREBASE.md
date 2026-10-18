@@ -3,8 +3,10 @@
 La tienda de la **Asociación Tecnológica Monterroso** usa **Firebase**
 (gratis en el plan "Spark") para guardar productos, clientes y pedidos.
 
-> ⚠️ **La tienda no mostrará productos hasta que completes esta guía**,
-> porque `firebase/firebase-config.js` trae valores de ejemplo.
+> ✅ **Este proyecto ya está conectado** al proyecto de Firebase
+> `atmgt-5d3a9` (los datos reales están en
+> `firebase/firebase-config.js`). Usa esta guía solo si quieres crear
+> otro proyecto desde cero o revisar la configuración.
 
 Tiempo estimado: **10–15 minutos**.
 
@@ -23,8 +25,8 @@ Tiempo estimado: **10–15 minutos**.
 1. En la pantalla principal, clic en el ícono **`</>`** (Web).
 2. Ponle un apodo, por ejemplo `monterroso-web`.
 3. Firebase te mostrará un bloque `firebaseConfig = { ... }`.
-4. Copia esos valores y pégalos en **`firebase/firebase-config.js`**,
-   reemplazando los `TU_...`:
+4. Copia esos valores y pégalos en **`firebase/firebase-config.js`**
+   (si creas un proyecto nuevo, reemplaza los valores actuales):
 
 ```js
 const firebaseConfig = {
@@ -42,25 +44,14 @@ const firebaseConfig = {
 1. Menú izquierdo: **Compilación > Firestore Database**.
 2. Clic en **"Crear base de datos"**.
 3. Ubicación: la más cercana (por ejemplo `us-central`).
-4. Empieza en **modo de prueba**.
-5. Ve a la pestaña **"Reglas"** y pega esto:
+4. Ubicación: la más cercana (por ejemplo `us-central`).
+5. Ve a la pestaña **"Reglas"** y pega las reglas seguras de la sección
+   [Seguridad](#seguridad-antes-de-producción) (más abajo).
 
-```
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
-```
-
-> ⚠️ Estas reglas permiten que **cualquiera** lea y escriba. Sirven para
-> probar, pero **no son seguras para producción**. Antes de usarla con
-> clientes reales hay que restringirlas (pídele ayuda a tu desarrollador
-> o revisa la sección "Seguridad" más abajo).
+> 🔴 **Nunca uses `allow read, write: if true`.** Esas reglas dejan toda
+> tu base de datos abierta: cualquiera con la dirección del sitio puede
+> leer (y borrar) productos, pedidos y datos de tus clientes, sin
+> iniciar sesión. Si ya las tenías puestas, cámbialas **hoy mismo**.
 
 ## 4. Activar Authentication (logins)
 
@@ -92,11 +83,15 @@ No hay que crearlas a mano. El sitio usa:
 4. Ve a `pages/tienda.html`: el producto debe aparecer en el catálogo.
 5. Agrégalo al carrito, finaliza el pedido y verifica:
    - Se creó el pedido en Firestore (`ventas`).
-   - El stock del producto bajó.
+   - El stock del producto bajó (solo mientras las reglas sigan
+     abiertas; con las reglas seguras el stock se ajusta desde el panel).
    - Te llegó el aviso de WhatsApp (si configuraste
-     `js/notificar-whatsapp.js`).
+     `js/notificar-whatsapp.js` con una clave válida).
 
 ## 7. Avisos por WhatsApp (opcional)
+
+> ⚠️ Esta función envía la clave desde el navegador, así que **cualquiera
+> puede verla**. Úsala solo si te parece aceptable ese riesgo.
 
 Para recibir un WhatsApp automático con cada pedido:
 
@@ -105,6 +100,8 @@ Para recibir un WhatsApp automático con cada pedido:
    `I allow callmebot to send me messages`
 3. Recibirás tu **APIKEY** por WhatsApp.
 4. Pégala en **`js/notificar-whatsapp.js`**, en `DESTINATARIOS`.
+   Si la dejas vacía (`apikey: ""`), el aviso queda desactivado y no se
+   envía nada; los pedidos igual aparecen en el panel.
 
 ## 8. Publicar el sitio (gratis)
 
@@ -117,13 +114,17 @@ estar publicado con `https://`.
 
 ## Seguridad (antes de producción)
 
-Las reglas del paso 3 son abiertas. Para proteger el sitio, lo ideal es:
+Objetivo de las reglas:
 
-- Que **solo el administrador** pueda crear/editar/borrar productos.
-- Que **cada cliente** solo pueda leer sus propios datos.
-- Que cualquiera pueda **leer productos** y **crear pedidos**.
+- Que **solo el administrador** pueda crear/editar/borrar productos y
+  leer los pedidos.
+- Que **cualquiera** pueda **leer productos** y **crear pedidos**
+  (así compran sin necesidad de cuenta).
+- Que **cada cliente** solo pueda leer y escribir sus propios datos.
 
-Ejemplo de reglas más seguras (ajústalas a tu caso):
+Estas reglas ya traen puesto el correo del administrador
+(`alanmonterroso02@gmail.com`); cámbialo ahí si usas otro. Pégalas en
+**Firestore Database > Reglas > Publicar**:
 
 ```
 rules_version = '2';
@@ -131,26 +132,53 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function esAdmin() {
+      return request.auth != null
+             && request.auth.token.email == "alanmonterroso02@gmail.com";
+    }
+
     // Productos: todos leen, solo el admin escribe
     match /productos/{id} {
       allow read: if true;
-      allow write: if request.auth != null
-                   && request.auth.token.email == "TU_CORREO_ADMIN@gmail.com";
+      allow write: if esAdmin();
     }
 
     // Ventas: cualquiera puede crear, solo el admin lee/edita
     match /ventas/{id} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null
-                   && request.auth.token.email == "TU_CORREO_ADMIN@gmail.com";
+      allow read, update, delete: if esAdmin();
     }
 
     // Clientes: cada uno su propio documento; el admin lee todo
     match /clientes/{uid} {
       allow read, write: if request.auth != null
-                   && (request.auth.uid == uid
-                       || request.auth.token.email == "TU_CORREO_ADMIN@gmail.com");
+             && (request.auth.uid == uid || esAdmin());
+    }
+
+    // Cualquier otra colección queda cerrada
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
 ```
+
+### Efecto en la tienda (importante)
+
+Con estas reglas, el cliente **ya no puede descontar el stock** al
+comprar (no tiene permiso de escritura sobre `productos`). Por eso, en
+`js/checkout.js`, dentro del bloque **"2. Descontar inventario"**, borra
+ese `for` completo una vez aplicadas las reglas. El stock se ajusta
+desde el panel de administración (Productos / Inventario).
+
+El pedido se sigue guardando y el panel lo muestra igual.
+
+### Otros pendientes de seguridad
+
+- La clave de CallMeBot (`js/notificar-whatsapp.js`) se envía desde el
+  navegador, así que **cualquiera puede verla**. Si estuvo publicada en
+  el repositorio, considérala comprometida: genera una nueva o deja el
+  aviso desactivado (los pedidos llegan igual al panel).
+- La configuración de Firebase (`apiKey`, etc.) **no es secreta**: lo
+  que protege los datos son las reglas de arriba, no ocultar esos IDs.
+

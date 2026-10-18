@@ -40,7 +40,7 @@ js/
   comun.js                     → Avisos (toast), precios, utilidades
 
 firebase/
-  firebase-config.js           → Configuración de Firebase (¡edítalo!)
+  firebase-config.js           → Configuración de Firebase (ya conectado)
 
 admin/
   login.html                   → Login del administrador
@@ -58,12 +58,16 @@ GUIA_FIREBASE.md               → Paso a paso para conectar Firebase
 
 ## Antes de usarlo
 
-1. Sigue **`GUIA_FIREBASE.md`** para crear tu proyecto de Firebase y
-   pegar los datos en `firebase/firebase-config.js`.
-   **La tienda no funciona hasta que lo hagas.**
-2. Cambia el número de WhatsApp en `js/notificar-whatsapp.js`
-   (avisos automáticos) y revisa el número de contacto en `index.html`.
-3. Sube tus productos desde `admin/login.html`.
+1. **Este proyecto ya está conectado** a Firebase (proyecto
+   `atmgt-5d3a9`). Si necesitas crear otro desde cero, sigue
+   **`GUIA_FIREBASE.md`**.
+2. Aplica las **reglas seguras** de Firestore (sección *Seguridad* de
+   la guía). Es lo más urgente: con reglas abiertas, cualquiera puede
+   leer y borrar tus datos.
+3. Avisos automáticos por WhatsApp: revisa
+   `js/notificar-whatsapp.js` (y ten en cuenta que la clave queda
+   visible para los visitantes).
+4. Sube tus productos desde `admin/login.html`.
 
 ---
 
@@ -73,8 +77,9 @@ GUIA_FIREBASE.md               → Paso a paso para conectar Firebase
 2. Agrega productos al carrito (no necesita iniciar sesión).
 3. En **Finalizar pedido** llena sus datos y, si lo desea, un campo de
    **notas de personalización**.
-4. Al confirmar: se guarda el pedido, se descuenta el stock y llega un
-   WhatsApp al administrador.
+4. Al confirmar: se vuelven a leer los **precios y el stock reales**
+   desde Firestore (no se confía en la caché del celular), se guarda el
+   pedido y llega un WhatsApp al administrador (si está configurado).
 
 ### Rendimiento en conexiones lentas
 
@@ -105,6 +110,13 @@ Entra por `admin/login.html` con el usuario que creaste en
 
 ## Seguridad
 
-Las reglas de Firestore de la guía son **abiertas** para pruebas.
-Antes de usarla con clientes reales hay que restringirlas
-(ver la sección "Seguridad" de `GUIA_FIREBASE.md`).
+Las reglas de Firestore deben impedir que extraños lean los pedidos y
+los datos de los clientes. En **`GUIA_FIREBASE.md`**, sección
+*Seguridad*, están las reglas listas para pegar (solo el administrador
+escribe productos y lee pedidos; cualquiera puede leer el catálogo y
+crear un pedido).
+
+Con esas reglas activas, el descuento de stock desde el navegador deja
+de funcionar (no es seguro permitirlo), así que hay que borrar el bloque
+*"2. Descontar inventario"* de `js/checkout.js` y ajustar el stock desde
+el panel.

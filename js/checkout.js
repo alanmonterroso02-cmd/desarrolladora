@@ -10,11 +10,12 @@ import {
   addDoc,
   doc,
   updateDoc,
+  increment,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import { obtenerCarrito, vaciar } from "./carrito.js";
-import { mapaProductos } from "./productos.js";
+import { mapaProductos, mapaProductosFrescos } from "./productos.js";
 import { avisarAdmin } from "./notificar-whatsapp.js";
 import { precio, aviso } from "./comun.js";
 import { iniciarSesionCliente, completarLoginRedirect } from "./auth-cliente.js";
@@ -45,6 +46,39 @@ async function calcularTotal() {
   }
 
   const mapa = await mapaProductos(carrito.map((i) => i.id));
+
+  total = 0;
+  productosCompra = [];
+
+  carrito.forEach((item) => {
+    const p = mapa[item.id];
+    if (!p) return;
+
+    const subtotal = (Number(p.precio) || 0) * item.cantidad;
+    total += subtotal;
+
+    productosCompra.push({
+      id: item.id,
+      nombre: p.nombre,
+      cantidad: item.cantidad,
+      precio: Number(p.precio) || 0,
+      stock: Number(p.stock) || 0,
+      subtotal: subtotal
+    });
+  });
+
+  totalEl.textContent = precio(total);
+}
+
+// ------------------------------------------------------------
+//  Vuelve a calcular el pedido con datos FRESCOS de Firestore.
+//  Se llama justo antes de crear la venta.
+// ------------------------------------------------------------
+
+async function refrescarCompra() {
+
+  const carrito = obtenerCarrito();
+  const mapa = await mapaProductosFrescos(carrito.map((i) => i.id));
 
   total = 0;
   productosCompra = [];
@@ -139,6 +173,32 @@ formulario.addEventListener("submit", async (e) => {
 
   try {
 
+    // 0. Recalcular con precios y stock REALES de Firestore
+    //    (la caché local puede estar desactualizada).
+    await refrescarCompra();
+
+    if (!productosCompra.length) {
+      aviso("Los productos de tu carrito ya no están disponibles", "error");
+      botonConfirmar.disabled = false;
+      botonConfirmar.textContent = "Confirmar pedido";
+      return;
+    }
+
+    const sinStock = productosCompra.filter(
+      (p) => Number(p.stock) < Number(p.cantidad)
+    );
+
+    if (sinStock.length) {
+      aviso(
+        "No hay suficiente inventario de: " +
+          sinStock.map((p) => p.nombre).join(", "),
+        "error"
+      );
+      botonConfirmar.disabled = false;
+      botonConfirmar.textContent = "Confirmar pedido";
+      return;
+    }
+
     // 1. Guardar el pedido
     await addDoc(collection(db, "ventas"), {
       cliente: nombre,
@@ -151,12 +211,14 @@ formulario.addEventListener("submit", async (e) => {
       estado: "Pendiente"
     });
 
-    // 2. Descontar inventario (sin bloquear si algo falla)
+    // 2. Descontar inventario de forma atómica.
+    //    ⚠️ Si cierras las reglas de Firestore (recomendado, ver
+    //    GUIA_FIREBASE.md), borra este bloque: el stock se ajusta
+    //    desde el panel de administración.
     for (const item of productosCompra) {
       try {
-        const nuevo = item.stock - item.cantidad;
         await updateDoc(doc(db, "productos", item.id), {
-          stock: nuevo < 0 ? 0 : nuevo
+          stock: increment(-item.cantidad)
         });
       } catch (err) {
         console.error("No se pudo actualizar el stock de " + item.id, err);

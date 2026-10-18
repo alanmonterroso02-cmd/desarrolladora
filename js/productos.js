@@ -92,3 +92,32 @@ export async function mapaProductos(ids) {
 
   return mapa;
 }
+
+// ------------------------------------------------------------
+//  Igual que mapaProductos, pero SIEMPRE leyendo Firestore.
+//  Se usa al confirmar el pedido: la caché local puede tener
+//  precios o stock viejos y no queremos guardar una venta con
+//  datos desactualizados.
+// ------------------------------------------------------------
+
+export async function mapaProductosFrescos(ids) {
+
+  const mapa = {};
+
+  const unicos = [...new Set(ids)];
+
+  for (const id of unicos) {
+    try {
+      const snap = await getDoc(doc(db, "productos", id));
+      if (snap.exists()) {
+        const p = snap.data();
+        p.id = id;
+        mapa[id] = p;
+      }
+    } catch (e) {
+      console.error("No se pudo leer el producto " + id, e);
+    }
+  }
+
+  return mapa;
+}
