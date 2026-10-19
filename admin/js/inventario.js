@@ -14,6 +14,7 @@ import {
 
 import { protegerPagina, conectarSalir } from "./sesion.js";
 import { aviso, escapar, precio } from "../../js/comun.js";
+import { htmlGanancia } from "./personalizados.js";
 
 let productos = [];
 
@@ -41,19 +42,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     aplicarFiltro();
-  }
-
-  // ---------- Cuánto queda por unidad ----------
-  //  Es el precio de venta menos el precio de costo. Si al producto
-  //  todavía no le pusiste costo, no se puede calcular.
-
-  function textoGanancia(cliente, costo) {
-
-    const ganancia = cliente - costo;
-    const negativo = ganancia < 0;
-
-    return `<span class="ganancia${negativo ? " ganancia-mala" : ""}">` +
-      (negativo ? "−" : "") + precio(Math.abs(ganancia)) + `</span>`;
   }
 
   // ---------- Fila ----------
@@ -86,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           ${celdaCosto}<br>
           <button class="btn btn-chico btn-gris" data-costo="${p.id}">Cambiar</button>
         </td>
-        <td>${costo ? textoGanancia(cliente, costo) : `<span class="mini">—</span>`}</td>
+        <td>${costo ? htmlGanancia(cliente - costo) : `<span class="mini">—</span>`}</td>
         <td><strong>${stock}</strong></td>
         <td><span class="insignia ${clase}">${estado}</span></td>
         <td><button class="btn btn-chico" data-sumar="${p.id}">+</button></td>

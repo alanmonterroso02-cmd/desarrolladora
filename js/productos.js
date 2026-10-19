@@ -7,9 +7,9 @@
 //  carrito y el checkout compartan la misma caché local.
 //
 //  OJO: este módulo lo usa la TIENDA (el cliente). Por eso, antes
-//  de guardar un producto en el navegador se le quita el precio de
-//  costo: es información solo del panel y no tiene por qué quedar
-//  en el celular de un cliente.
+//  de GUARDAR los productos en la memoria del navegador se les quita
+//  el precio de costo: es información solo del panel y no tiene por
+//  qué quedar en el celular de un cliente.
 // ============================================================
 
 import { db } from "../firebase/firebase-config.js";
@@ -24,7 +24,8 @@ import {
 const CLAVE_CACHE = "productos_cache";
 
 // ------------------------------------------------------------
-//  Quita el precio de costo antes de devolver un producto
+//  Quita el precio de costo antes de guardar un producto en la
+//  memoria del navegador (la caché del catálogo).
 // ------------------------------------------------------------
 
 function sinCosto(p) {
@@ -99,7 +100,7 @@ export async function mapaProductos(ids) {
       if (snap.exists()) {
         const p = snap.data();
         p.id = id;
-        mapa[id] = sinCosto(p);
+        mapa[id] = p;
       }
     } catch (e) {
       console.error("No se pudo leer el producto " + id, e);
@@ -114,6 +115,10 @@ export async function mapaProductos(ids) {
 //  Se usa al confirmar el pedido: la caché local puede tener
 //  precios o stock viejos y no queremos guardar una venta con
 //  datos desactualizados.
+//
+//  Ojo: aquí SÍ viene el precio de costo. El checkout lo guarda
+//  dentro de la venta para poder calcular después la ganancia de
+//  ese pedido, aunque el costo del producto cambie.
 // ------------------------------------------------------------
 
 export async function mapaProductosFrescos(ids) {
@@ -128,7 +133,7 @@ export async function mapaProductosFrescos(ids) {
       if (snap.exists()) {
         const p = snap.data();
         p.id = id;
-        mapa[id] = sinCosto(p);
+        mapa[id] = p;
       }
     } catch (e) {
       console.error("No se pudo leer el producto " + id, e);

@@ -78,6 +78,9 @@ function armarCompra(carrito, mapa) {
       nombre: p.nombre,
       cantidad: item.cantidad,
       precio: Number(p.precio) || 0,
+      // El costo se guarda tal como está HOY: así el panel puede
+      // mostrar la ganancia de este pedido aunque después cambie.
+      precioCosto: Number(p.precioCosto) || 0,
       stock: Number(p.stock) || 0,
       subtotal: subtotal,
       personalizable: !!p.personalizable

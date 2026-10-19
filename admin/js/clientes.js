@@ -19,6 +19,10 @@
 //  Solo se usan teléfono/nombre para emparejar cuando ese dato es
 //  único entre los clientes. Así nunca se le cuelga un pedido a la
 //  persona equivocada.
+//
+//  También se lee "productos", solo para saber el costo actual de
+//  cada uno: sirve de respaldo en los pedidos viejos, porque en los
+//  nuevos el costo ya viene guardado dentro de la propia venta.
 // ============================================================
 
 import { db } from "../../firebase/firebase-config.js";
@@ -160,10 +164,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function cargar() {
 
-    // Las dos colecciones se piden a la vez, para no esperar dos veces.
-    const [datosClientes, datosVentas] = await Promise.all([
+    // Las tres colecciones se piden a la vez, para no esperar de más.
+    const [datosClientes, datosVentas, datosProductos] = await Promise.all([
       getDocs(collection(db, "clientes")),
-      getDocs(collection(db, "ventas"))
+      getDocs(collection(db, "ventas")),
+      getDocs(collection(db, "productos"))
     ]);
 
     clientes = [];
@@ -174,10 +179,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       clientes.push(c);
     });
 
+    // El costo de hoy de cada producto. Es el respaldo para los
+    // pedidos hechos antes de que el costo se guardara en la venta.
+    const costosHoy = {};
+    datosProductos.forEach((documento) => {
+      costosHoy[documento.id] = Number(documento.data().precioCosto) || 0;
+    });
+
     pedidos = [];
     datosVentas.forEach((documento) => {
       const v = documento.data();
       v.id = documento.id;
+
+      (v.productos || []).forEach((p) => {
+        if (!Number(p.precioCosto) && costosHoy[p.id]) {
+          p.precioCosto = costosHoy[p.id];
+          p.costoAproximado = true;
+        }
+      });
+
       pedidos.push(v);
     });
 

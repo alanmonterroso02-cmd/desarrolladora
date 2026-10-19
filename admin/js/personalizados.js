@@ -12,11 +12,15 @@
 //  haber una pieza por unidad (cada una con su imagen y su
 //  descripción), porque cada una puede ser diferente.
 //
+//  También se muestra aquí lo que costó y lo que dejó cada renglón
+//  del pedido (precio de costo y ganancia), que es información solo
+//  del panel: el cliente nunca la ve.
+//
 //  Aquí está el pedacito de HTML que lo muestra en las tablas del
 //  panel, para no repetirlo en Ventas y en Clientes.
 // ============================================================
 
-import { escapar } from "../../js/comun.js";
+import { escapar, precio } from "../../js/comun.js";
 import { listaPiezas, piezaConDatos } from "../../js/personalizacion.js";
 
 // ------------------------------------------------------------
@@ -77,6 +81,44 @@ export function htmlDetallePersonalizacion(p) {
 }
 
 // ------------------------------------------------------------
+//  La ganancia con su color: verde si dejó, rojo si costó más de
+//  lo que se vendió.
+// ------------------------------------------------------------
+
+export function htmlGanancia(valor) {
+
+  const negativo = valor < 0;
+
+  return `<span class="ganancia${negativo ? " ganancia-mala" : ""}">` +
+    (negativo ? "−" : "") + precio(Math.abs(valor)) + `</span>`;
+}
+
+// ------------------------------------------------------------
+//  Lo que costó y lo que dejó un renglón del pedido
+//
+//  El costo se guarda dentro de la venta al momento de comprar. En
+//  los pedidos de antes no quedó guardado, así que se usa el costo
+//  de hoy y se avisa ("actual").
+// ------------------------------------------------------------
+
+function htmlCuentas(p) {
+
+  const cantidad = Number(p.cantidad) || 1;
+  const costo = Number(p.precioCosto) || 0;
+
+  // Todavía no se le puso costo a ese producto.
+  if (!costo) return `<br><span class="mini">sin costo registrado</span>`;
+
+  const venta = Number(p.subtotal) || (Number(p.precio) || 0) * cantidad;
+  const costoTotal = costo * cantidad;
+
+  return `
+    <br>
+    <span class="mini">costo ${precio(costoTotal)}${p.costoAproximado ? " (actual)" : ""} · </span>
+    ${htmlGanancia(venta - costoTotal)}`;
+}
+
+// ------------------------------------------------------------
 //  Un renglón por producto del pedido
 // ------------------------------------------------------------
 
@@ -85,6 +127,7 @@ export function htmlProductos(productos) {
   return (productos || []).map((p) => `
     <div class="prod-admin">
       ${escapar(p.nombre)} x${p.cantidad || 1}
+      ${htmlCuentas(p)}
       ${htmlDetallePersonalizacion(p)}
     </div>`).join("");
 }

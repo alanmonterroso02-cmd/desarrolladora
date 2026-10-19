@@ -23,7 +23,7 @@ import {
 import { protegerPagina, conectarSalir } from "./sesion.js";
 import { aviso, escapar, precio } from "../../js/comun.js";
 import { comprobanteDePedido } from "./comprobante.js";
-import { htmlProductos, conectarMiniaturas } from "./personalizados.js";
+import { htmlProductos, conectarMiniaturas, htmlGanancia } from "./personalizados.js";
 
 const ESTADOS = ["Pendiente", "Trabajado", "Entregado", "Cancelado"];
 
@@ -44,12 +44,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function cargar() {
 
-    const datos = await getDocs(collection(db, "ventas"));
+    // Los pedidos y los productos se piden a la vez.
+    const [datosVentas, datosProductos] = await Promise.all([
+      getDocs(collection(db, "ventas")),
+      getDocs(collection(db, "productos"))
+    ]);
+
+    // El costo de hoy de cada producto. Es el respaldo para los
+    // pedidos hechos antes de que el costo se guardara en la venta.
+    const costosHoy = {};
+    datosProductos.forEach((documento) => {
+      costosHoy[documento.id] = Number(documento.data().precioCosto) || 0;
+    });
+
     ventas = [];
 
-    datos.forEach((documento) => {
+    datosVentas.forEach((documento) => {
       const v = documento.data();
       v.id = documento.id;
+
+      (v.productos || []).forEach((p) => {
+        if (!Number(p.precioCosto) && costosHoy[p.id]) {
+          p.precioCosto = costosHoy[p.id];
+          p.costoAproximado = true;
+        }
+      });
+
       ventas.push(v);
     });
 
@@ -101,6 +121,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     return "insignia-amarilla";
   }
 
+  // ---------- Lo que costó y lo que dejó el pedido ----------
+  //  Solo se calcula si TODOS sus renglones tienen costo: si falta
+  //  uno, la ganancia saldría más alta de lo que es en realidad.
+
+  function cuentasPedido(v) {
+
+    const productos = v.productos || [];
+
+    if (!productos.length) return null;
+    if (productos.some((p) => !Number(p.precioCosto))) return null;
+
+    let costo = 0;
+    let aproximado = false;
+
+    productos.forEach((p) => {
+      costo += (Number(p.precioCosto) || 0) * (Number(p.cantidad) || 1);
+      if (p.costoAproximado) aproximado = true;
+    });
+
+    return {
+      costo: costo,
+      ganancia: (Number(v.total) || 0) - costo,
+      aproximado: aproximado
+    };
+  }
+
   // ---------- Fila ----------
 
   function fila(v) {
@@ -108,6 +154,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const estado = v.estado || "Pendiente";
 
     const lista = htmlProductos(v.productos);
+
+    const cuentas = cuentasPedido(v);
+
+    const celdaCosto = cuentas
+      ? precio(cuentas.costo) +
+        (cuentas.aproximado ? `<br><span class="mini">costo de hoy</span>` : "")
+      : `<span class="mini">—</span>`;
+
+    const celdaGanancia = cuentas
+      ? htmlGanancia(cuentas.ganancia)
+      : `<span class="mini">—</span>`;
 
     const opciones = ESTADOS
       .map((e) => `<option value="${e}" ${estado === e ? "selected" : ""}>${e}</option>`)
@@ -128,6 +185,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           ${v.notas ? `<br><span class="mini">✎ ${escapar(v.notas)}</span>` : ""}
         </td>
         <td><strong>${precio(v.total)}</strong></td>
+        <td>${celdaCosto}</td>
+        <td>${celdaGanancia}</td>
         <td class="mini">${formatearFecha(v.fecha)}</td>
         <td>
           <select class="selector-estado ${claseEstado(estado)}"
@@ -160,7 +219,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!lista.length) {
       tabla.innerHTML =
-        `<tr><td colspan="7" class="mini">No hay pedidos que coincidan</td></tr>`;
+        `<tr><td colspan="9" class="mini">No hay pedidos que coincidan</td></tr>`;
       return;
     }
 
