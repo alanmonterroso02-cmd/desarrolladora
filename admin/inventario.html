@@ -54,12 +54,20 @@
           <input type="text" id="buscarInventario" placeholder="Buscar producto…">
         </div>
 
+        <p class="mini">
+          El precio de costo y la ganancia son solo para ti: el cliente
+          únicamente ve el precio de venta. La ganancia es por unidad.
+        </p>
+
         <div class="tabla-scroll">
           <table>
             <thead>
               <tr>
                 <th>Imagen</th>
                 <th>Producto</th>
+                <th>Precio cliente</th>
+                <th>Precio costo</th>
+                <th>Ganancia</th>
                 <th>Stock</th>
                 <th>Estado</th>
                 <th>+1</th>
@@ -68,7 +76,7 @@
               </tr>
             </thead>
             <tbody id="tablaInventario">
-              <tr><td colspan="7" class="mini">Cargando…</td></tr>
+              <tr><td colspan="10" class="mini">Cargando…</td></tr>
             </tbody>
           </table>
         </div>

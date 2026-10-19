@@ -137,6 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           ${p.personalizable ? ' <span class="mini">· personalizable</span>' : ""}
         </td>
         <td>${precio(p.precio)}</td>
+        <td>${p.precioCosto ? precio(p.precioCosto) : '<span class="mini">—</span>'}</td>
         <td>
           <span class="insignia ${agotado ? "insignia-roja" : "insignia-verde"}">
             ${p.stock}
@@ -160,7 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!resultado.length) {
       tabla.innerHTML =
-        `<tr><td colspan="5" class="mini">No hay productos</td></tr>`;
+        `<tr><td colspan="6" class="mini">No hay productos</td></tr>`;
       return;
     }
 
@@ -177,6 +178,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       nombre: document.getElementById("nombre").value.trim(),
       categoria: document.getElementById("categoria").value,
       precio: Number(document.getElementById("precio").value),
+      // Precio de costo: lo que te cuesta hacerlo. Es solo para el
+      // panel (inventario); el cliente nunca lo ve.
+      precioCosto: Number(document.getElementById("precioCosto").value) || 0,
       stock: Number(document.getElementById("stock").value),
       descripcion: document.getElementById("descripcion").value.trim(),
       personalizable: document.getElementById("personalizable").checked,
@@ -212,6 +216,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("nombre").value = p.nombre || "";
     document.getElementById("categoria").value = p.categoria || "Otros";
     document.getElementById("precio").value = p.precio || 0;
+    document.getElementById("precioCosto").value = p.precioCosto || 0;
     document.getElementById("stock").value = p.stock || 0;
     document.getElementById("descripcion").value = p.descripcion || "";
     document.getElementById("personalizable").checked = !!p.personalizable;

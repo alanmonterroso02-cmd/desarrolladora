@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import { protegerPagina, conectarSalir } from "./sesion.js";
-import { aviso, escapar } from "../../js/comun.js";
+import { aviso, escapar, precio } from "../../js/comun.js";
 
 let productos = [];
 
@@ -43,6 +43,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     aplicarFiltro();
   }
 
+  // ---------- Cuánto queda por unidad ----------
+  //  Es el precio de venta menos el precio de costo. Si al producto
+  //  todavía no le pusiste costo, no se puede calcular.
+
+  function textoGanancia(cliente, costo) {
+
+    const ganancia = cliente - costo;
+    const negativo = ganancia < 0;
+
+    return `<span class="ganancia${negativo ? " ganancia-mala" : ""}">` +
+      (negativo ? "−" : "") + precio(Math.abs(ganancia)) + `</span>`;
+  }
+
   // ---------- Fila ----------
 
   function fila(p) {
@@ -54,6 +67,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     else if (stock <= 5) { estado = "Bajo"; clase = "insignia-amarilla"; }
     else { estado = "Disponible"; clase = "insignia-verde"; }
 
+    const cliente = Number(p.precio) || 0;
+    const costo = Number(p.precioCosto) || 0;
+
+    const celdaCosto = costo
+      ? `<strong>${precio(costo)}</strong>`
+      : `<span class="mini">sin costo</span>`;
+
     return `
       <tr>
         <td><img src="${escapar(p.imagen || "")}" alt="${escapar(p.nombre)}" loading="lazy"></td>
@@ -61,6 +81,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           <strong>${escapar(p.nombre)}</strong><br>
           <span class="mini">${escapar(p.categoria || "")}</span>
         </td>
+        <td><strong>${precio(cliente)}</strong></td>
+        <td>
+          ${celdaCosto}<br>
+          <button class="btn btn-chico btn-gris" data-costo="${p.id}">Cambiar</button>
+        </td>
+        <td>${costo ? textoGanancia(cliente, costo) : `<span class="mini">—</span>`}</td>
         <td><strong>${stock}</strong></td>
         <td><span class="insignia ${clase}">${estado}</span></td>
         <td><button class="btn btn-chico" data-sumar="${p.id}">+</button></td>
@@ -79,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       : productos;
 
     if (!lista.length) {
-      tabla.innerHTML = `<tr><td colspan="7" class="mini">No hay productos</td></tr>`;
+      tabla.innerHTML = `<tr><td colspan="10" class="mini">No hay productos</td></tr>`;
       return;
     }
 
@@ -101,12 +127,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ---------- Cambiar el precio de costo ----------
+
+  async function fijarCosto(id, valor) {
+
+    if (!isFinite(valor) || valor < 0) {
+      aviso("Escribe un precio válido", "error");
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "productos", id), { precioCosto: valor });
+      await cargar();
+    } catch (error) {
+      console.error(error);
+      aviso("No se pudo actualizar el precio de costo", "error");
+    }
+  }
+
   tabla.addEventListener("click", async (e) => {
 
     const boton = e.target.closest("button");
     if (!boton) return;
 
-    const id = boton.dataset.sumar || boton.dataset.restar || boton.dataset.fijar;
+    const id = boton.dataset.sumar || boton.dataset.restar ||
+      boton.dataset.fijar || boton.dataset.costo;
     const p = productos.find((x) => x.id === id);
     if (!p) return;
 
@@ -122,6 +167,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const valor = prompt("Cantidad en stock:", actual);
       if (valor === null) return;
       await fijarStock(id, Number(valor));
+
+    } else if (boton.dataset.costo) {
+      const valor = prompt("Precio de costo (Q):", Number(p.precioCosto) || 0);
+      if (valor === null) return;
+      await fijarCosto(id, Number(valor.replace(",", ".")));
     }
   });
 

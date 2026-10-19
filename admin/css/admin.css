@@ -326,6 +326,17 @@ table img {
   color: #38bdf8;
 }
 
+/* ---------- Precio de costo y ganancia (Inventario) ---------- */
+
+.ganancia {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.ganancia-mala {
+  color: #f87171;
+}
+
 /* ---------- Selector de estado (Ventas) ---------- */
 
 .selector-estado {

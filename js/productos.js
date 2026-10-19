@@ -1,10 +1,15 @@
-// ============================================================
+// ------------------------------------------------------------
 //  PRODUCTOS.JS - Acceso a productos (caché + Firestore)
 //  Asociación Tecnológica Monterroso
 // ============================================================
 //
 //  Centraliza la lectura de productos para que el catálogo, el
 //  carrito y el checkout compartan la misma caché local.
+//
+//  OJO: este módulo lo usa la TIENDA (el cliente). Por eso, antes
+//  de guardar un producto en el navegador se le quita el precio de
+//  costo: es información solo del panel y no tiene por qué quedar
+//  en el celular de un cliente.
 // ============================================================
 
 import { db } from "../firebase/firebase-config.js";
@@ -17,6 +22,17 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 const CLAVE_CACHE = "productos_cache";
+
+// ------------------------------------------------------------
+//  Quita el precio de costo antes de devolver un producto
+// ------------------------------------------------------------
+
+function sinCosto(p) {
+
+  if (p && p.precioCosto != null) delete p.precioCosto;
+
+  return p;
+}
 
 // ------------------------------------------------------------
 //  Caché local (localStorage)
@@ -54,7 +70,7 @@ export async function cargarTodosLosProductos() {
   snap.forEach((documento) => {
     const p = documento.data();
     p.id = documento.id;
-    productos.push(p);
+    productos.push(sinCosto(p));
   });
 
   escribirCacheProductos(productos);
@@ -83,7 +99,7 @@ export async function mapaProductos(ids) {
       if (snap.exists()) {
         const p = snap.data();
         p.id = id;
-        mapa[id] = p;
+        mapa[id] = sinCosto(p);
       }
     } catch (e) {
       console.error("No se pudo leer el producto " + id, e);
@@ -112,7 +128,7 @@ export async function mapaProductosFrescos(ids) {
       if (snap.exists()) {
         const p = snap.data();
         p.id = id;
-        mapa[id] = p;
+        mapa[id] = sinCosto(p);
       }
     } catch (e) {
       console.error("No se pudo leer el producto " + id, e);
