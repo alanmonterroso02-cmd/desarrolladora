@@ -20,8 +20,9 @@ import { initializeApp } from
 import { getFirestore } from
   "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-import { getAuth } from
-  "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+// El SDK de Auth (login) NO se carga aquí: solo lo importa
+// firebase/firebase-auth.js, y eso solo en el checkout y el panel.
+// Así la tienda y el catálogo no descargan ~50 KB de más.
 
 const firebaseConfig = {
   apiKey: "AIzaSyBpYQLQDU4Z3hJ0PJ1pjo_wegqMiSFeyuM",
@@ -38,5 +39,6 @@ export const firebaseConfigurado =
 
 const app = initializeApp(firebaseConfig);
 
+export { app };
+
 export const db = getFirestore(app);
-export const auth = getAuth(app);

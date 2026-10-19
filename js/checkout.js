@@ -3,7 +3,8 @@
 //  Asociación Tecnológica Monterroso
 // ============================================================
 
-import { auth, db, firebaseConfigurado } from "../firebase/firebase-config.js";
+import { db, firebaseConfigurado } from "../firebase/firebase-config.js";
+import { auth } from "../firebase/firebase-auth.js";
 
 import {
   collection,
