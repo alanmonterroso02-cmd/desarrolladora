@@ -275,10 +275,6 @@ body {
   margin-top: 15px;
 }
 
-.btn-apagado {
-  background: #374151;
-}
-
 .btn-mini {
   width: 32px;
   height: 32px;
@@ -380,12 +376,6 @@ body {
 .modal-desc {
   color: var(--texto-suave);
   line-height: 1.6;
-}
-
-.modal-stock {
-  color: var(--texto-suave);
-  font-size: 14px;
-  margin-top: 10px;
 }
 
 /* ---------- Carrito ---------- */
@@ -643,7 +633,7 @@ body {
   background: #374151;
 }
 
-/* ---------- Personalización (carrito y checkout) ---------- */
+/* ---------- Personalización (carrito) ---------- */
 
 .perso {
   margin-top: 14px;
@@ -763,45 +753,7 @@ body {
   color: #34d399;
 }
 
-/* ---------- Personalización dentro del checkout ---------- */
-
-.zona-personalizar {
-  margin-bottom: 20px;
-  padding: 18px;
-  border: 1px solid var(--borde);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.zona-personalizar-titulo {
-  font-size: 17px;
-  margin-bottom: 6px;
-}
-
-.zona-personalizar-ayuda {
-  color: var(--texto-suave);
-  font-size: 13px;
-  line-height: 1.5;
-  margin-bottom: 14px;
-}
-
-.perso-bloque + .perso-bloque {
-  margin-top: 18px;
-}
-
-.perso-producto {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.perso-producto .linea-precio {
-  font-weight: 400;
-  margin-left: 6px;
-}
-
-.perso-bloque .perso {
-  margin-top: 8px;
-}
+/* ---------- Aviso de personalizable en el detalle del producto ---------- */
 
 .modal-perso {
   margin-top: 12px;

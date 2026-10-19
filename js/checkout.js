@@ -25,8 +25,6 @@ import { mapaProductos, mapaProductosFrescos } from "./productos.js";
 import { avisarAdmin } from "./notificar-whatsapp.js";
 import { precio, aviso, escapar } from "./comun.js";
 import {
-  htmlPersonalizacion,
-  conectarPersonalizacion,
   resumenPersonalizacion,
   estaVacia
 } from "./personalizacion.js";
@@ -37,8 +35,6 @@ const totalEl = document.getElementById("totalCompra");
 const botonGoogle = document.getElementById("btnGoogle");
 const botonConfirmar = document.getElementById("btnConfirmar");
 const sesionEl = document.getElementById("sesionCliente");
-const zonaPersonalizar = document.getElementById("zonaPersonalizar");
-const listaPersonalizar = document.getElementById("listaPersonalizar");
 
 let productosCompra = [];
 let total = 0;
@@ -46,10 +42,6 @@ let total = 0;
 // Cuántos productos personalizados van SIN detalles. No bloquea el
 // pedido: solo se avisa al cliente y al administrador.
 let sinDetalles = 0;
-
-// Los recuadros se vuelven a dibujar, pero el listener va en el
-// contenedor de arriba, así que sigue funcionando.
-conectarPersonalizacion(document.getElementById("zonaCheckout"));
 
 // ------------------------------------------------------------
 //  Arma la lista de productos a comprar
@@ -98,44 +90,6 @@ function armarCompra(carrito, mapa) {
 }
 
 // ------------------------------------------------------------
-//  Cuadro para personalizar los productos del carrito.
-//  Se muestran otra vez aquí (y no solo en el carrito) para que al
-//  cliente no se le pasen por alto sin darse cuenta.
-// ------------------------------------------------------------
-
-function pintarPersonalizacion(carrito, mapa) {
-
-  if (!zonaPersonalizar || !listaPersonalizar) return;
-
-  const personalizables = carrito.filter((item) => {
-    const p = mapa[item.id];
-    return p && p.personalizable;
-  });
-
-  if (!personalizables.length) {
-    zonaPersonalizar.hidden = true;
-    listaPersonalizar.innerHTML = "";
-    return;
-  }
-
-  listaPersonalizar.innerHTML = personalizables.map((item) => {
-
-    const p = mapa[item.id];
-
-    return `
-      <div class="perso-bloque">
-        <p class="perso-producto">
-          ${escapar(p.nombre)}
-          <span class="linea-precio">x${item.cantidad}</span>
-        </p>
-        ${htmlPersonalizacion(item)}
-      </div>`;
-  }).join("");
-
-  zonaPersonalizar.hidden = false;
-}
-
-// ------------------------------------------------------------
 //  Calcula el total con los datos reales de Firestore
 // ------------------------------------------------------------
 
@@ -155,11 +109,10 @@ async function calcularTotal() {
   const mapa = await mapaProductos(carrito.map((i) => i.id));
 
   armarCompra(carrito, mapa);
-  pintarPersonalizacion(carrito, mapa);
 }
 
 // ------------------------------------------------------------
-//  Vuelve a calcular el pedido con datos FRESCOS de Firestore.
+//  Vuelve a calcular el pedido con los PRECIOS frescos de Firestore.
 //  Se llama justo antes de crear la venta.
 // ------------------------------------------------------------
 
@@ -366,7 +319,7 @@ formulario.addEventListener("submit", async (e) => {
 
   try {
 
-    // 0. Recalcular con precios y stock REALES de Firestore
+    // 0. Recalcular con precios REALES de Firestore
     //    (la caché local puede estar desactualizada).
     await refrescarCompra();
 
@@ -376,19 +329,8 @@ formulario.addEventListener("submit", async (e) => {
       return;
     }
 
-    const sinStock = productosCompra.filter(
-      (p) => Number(p.stock) < Number(p.cantidad)
-    );
-
-    if (sinStock.length) {
-      aviso(
-        "No hay suficiente inventario de: " +
-          sinStock.map((p) => p.nombre).join(", "),
-        "error"
-      );
-      restaurarBoton();
-      return;
-    }
+    // El stock es solo para el panel del administrador: nunca le frena
+    // la compra al cliente.
 
     // Productos personalizados sin detalles: el pedido SÍ pasa (no es
     // obligatorio), pero se le avisa al cliente.
@@ -440,7 +382,8 @@ formulario.addEventListener("submit", async (e) => {
       console.error("No se pudieron guardar los datos del cliente:", err);
     }
 
-    // 2. Descontar inventario de forma atómica.
+    // 2. Descontar inventario de forma atómica. Esto es solo para el
+    //    panel del administrador; al cliente no le afecta en nada.
     //    ⚠️ Si cierras las reglas de Firestore (recomendado, ver
     //    GUIA_FIREBASE.md), borra este bloque: el stock se ajusta
     //    desde el panel de administración.

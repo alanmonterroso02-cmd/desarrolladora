@@ -37,8 +37,6 @@ function tarjeta(id, p) {
     ? `<span class="etiqueta">Personalizable</span>`
     : "";
 
-  const agotado = Number(p.stock) <= 0;
-
   return `
     <div class="producto" data-id="${id}">
       <div class="producto-imagen">
@@ -53,11 +51,7 @@ function tarjeta(id, p) {
         <p class="producto-desc">${escapar(p.descripcion || "")}</p>
         <div class="producto-pie">
           <strong class="producto-precio">${precio(p.precio)}</strong>
-          <button class="btn btn-chico ${agotado ? "btn-apagado" : ""}"
-                  data-agregar="${id}"
-                  ${agotado ? "disabled" : ""}>
-            ${agotado ? "Agotado" : "Agregar"}
-          </button>
+          <button class="btn btn-chico" data-agregar="${id}">Agregar</button>
         </div>
       </div>
     </div>
@@ -126,13 +120,7 @@ function abrirDetalle(id) {
            poder subir una imagen de referencia y describir cómo lo quieres.
          </p>`
       : ""}
-    <p class="modal-stock">${
-      Number(p.stock) > 0
-        ? "Disponible: " + p.stock
-        : "Agotado por el momento"
-    }</p>
-    <button class="btn btn-ancho" id="modalAgregar"
-            ${Number(p.stock) <= 0 ? "disabled" : ""}>
+    <button class="btn btn-ancho" id="modalAgregar">
       Agregar al carrito
     </button>
   `;
