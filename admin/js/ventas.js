@@ -23,6 +23,7 @@ import {
 import { protegerPagina, conectarSalir } from "./sesion.js";
 import { aviso, escapar, precio } from "../../js/comun.js";
 import { comprobanteDePedido } from "./comprobante.js";
+import { htmlProductos, conectarMiniaturas } from "./personalizados.js";
 
 const ESTADOS = ["Pendiente", "Trabajado", "Entregado", "Cancelado"];
 
@@ -106,9 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const estado = v.estado || "Pendiente";
 
-    const lista = (v.productos || [])
-      .map((p) => escapar(p.nombre) + " x" + p.cantidad)
-      .join("<br>");
+    const lista = htmlProductos(v.productos);
 
     const opciones = ESTADOS
       .map((e) => `<option value="${e}" ${estado === e ? "selected" : ""}>${e}</option>`)
@@ -229,6 +228,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   buscador.addEventListener("input", filtrar);
   filtroEstado.addEventListener("change", filtrar);
+
+  // Las imágenes de referencia se agrandan al tocarlas.
+  conectarMiniaturas(tabla);
 
   try {
     await cargar();

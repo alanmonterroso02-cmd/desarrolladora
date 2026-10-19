@@ -120,6 +120,12 @@ function abrirDetalle(id) {
     <h3>${escapar(p.nombre)}</h3>
     <p class="modal-precio">${precio(p.precio)}</p>
     <p class="modal-desc">${escapar(p.descripcion || "")}</p>
+    ${p.personalizable
+      ? `<p class="modal-perso">
+           <strong>Personalizable:</strong> al agregarlo al carrito vas a
+           poder subir una imagen de referencia y describir cómo lo quieres.
+         </p>`
+      : ""}
     <p class="modal-stock">${
       Number(p.stock) > 0
         ? "Disponible: " + p.stock

@@ -6,11 +6,18 @@
 import { obtenerCarrito, sumar, restar, eliminar } from "./carrito.js";
 import { mapaProductos } from "./productos.js";
 import { precio, escapar } from "./comun.js";
+import {
+  htmlPersonalizacion,
+  conectarPersonalizacion
+} from "./personalizacion.js";
 
 const contenedor = document.getElementById("itemsCarrito");
 const totalEl = document.getElementById("totalCompra");
 
 let carrito = obtenerCarrito();
+
+// Los productos personalizables se dejan configurar aquí mismo.
+conectarPersonalizacion(contenedor);
 
 // ------------------------------------------------------------
 //  Dibuja el carrito
@@ -47,21 +54,27 @@ async function dibujar() {
 
     html += `
       <div class="linea-carrito">
-        <img src="${escapar(p.imagen || "")}" alt="${escapar(p.nombre)}"
-             loading="lazy" decoding="async" width="72" height="72">
-        <div class="linea-datos">
-          <strong>${escapar(p.nombre)}</strong>
-          <span class="linea-precio">${precio(p.precio)} c/u</span>
-          <div class="linea-cantidad">
-            <button class="btn-mini" data-restar="${item.id}" aria-label="Quitar uno">−</button>
-            <span>${item.cantidad}</span>
-            <button class="btn-mini" data-sumar="${item.id}" aria-label="Agregar uno">+</button>
+
+        <div class="linea-fila">
+          <img src="${escapar(p.imagen || "")}" alt="${escapar(p.nombre)}"
+               loading="lazy" decoding="async" width="72" height="72">
+          <div class="linea-datos">
+            <strong>${escapar(p.nombre)}</strong>
+            <span class="linea-precio">${precio(p.precio)} c/u</span>
+            <div class="linea-cantidad">
+              <button class="btn-mini" data-restar="${item.id}" aria-label="Quitar uno">−</button>
+              <span>${item.cantidad}</span>
+              <button class="btn-mini" data-sumar="${item.id}" aria-label="Agregar uno">+</button>
+            </div>
+          </div>
+          <div class="linea-final">
+            <strong>${precio(subtotal)}</strong>
+            <button class="btn-texto" data-eliminar="${item.id}">Eliminar</button>
           </div>
         </div>
-        <div class="linea-final">
-          <strong>${precio(subtotal)}</strong>
-          <button class="btn-texto" data-eliminar="${item.id}">Eliminar</button>
-        </div>
+
+        ${p.personalizable ? htmlPersonalizacion(item) : ""}
+
       </div>
     `;
   });

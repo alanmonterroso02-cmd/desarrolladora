@@ -391,14 +391,18 @@ body {
 /* ---------- Carrito ---------- */
 
 .linea-carrito {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+  display: block;
   background: var(--tarjeta);
   border: 1px solid var(--borde);
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 14px;
+}
+
+.linea-fila {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .linea-carrito img {
@@ -639,6 +643,181 @@ body {
   background: #374151;
 }
 
+/* ---------- Personalización (carrito y checkout) ---------- */
+
+.perso {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px dashed rgba(0, 191, 255, 0.45);
+  border-radius: 12px;
+  background: rgba(0, 191, 255, 0.05);
+}
+
+.perso-cabecera {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.perso-marca {
+  display: inline-block;
+  background: rgba(0, 191, 255, 0.18);
+  color: var(--azul);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  margin-right: 8px;
+  vertical-align: 1px;
+}
+
+.perso-ayuda {
+  color: var(--texto-suave);
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.perso-imagenes {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.perso-vista {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: #0e1526;
+}
+
+.perso-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+/* El input de archivo real queda escondido (pero sigue existiendo):
+   el botón es la etiqueta, que funciona igual en computadora y en
+   celular. */
+.perso-boton {
+  position: relative;
+  display: inline-block;
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--azul);
+  color: var(--azul);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.perso-boton:hover {
+  background: rgba(0, 191, 255, 0.12);
+}
+
+.perso-boton input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.perso-texto {
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: #0e1526;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 70px;
+}
+
+.perso-texto:focus {
+  outline: none;
+  border-color: var(--azul);
+}
+
+.perso-estado {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+
+.perso-estado.perso-listo {
+  color: #34d399;
+}
+
+/* ---------- Personalización dentro del checkout ---------- */
+
+.zona-personalizar {
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.zona-personalizar-titulo {
+  font-size: 17px;
+  margin-bottom: 6px;
+}
+
+.zona-personalizar-ayuda {
+  color: var(--texto-suave);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.perso-bloque + .perso-bloque {
+  margin-top: 18px;
+}
+
+.perso-producto {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.perso-producto .linea-precio {
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+.perso-bloque .perso {
+  margin-top: 8px;
+}
+
+.modal-perso {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: rgba(0, 191, 255, 0.08);
+  border: 1px solid rgba(0, 191, 255, 0.25);
+  color: var(--texto-suave);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.modal-perso strong {
+  color: var(--azul);
+}
+
 /* ---------- Pie ---------- */
 
 .pie {
@@ -675,7 +854,7 @@ body {
     -webkit-line-clamp: 2;
   }
 
-  .linea-carrito {
+  .linea-fila {
     flex-wrap: wrap;
   }
 

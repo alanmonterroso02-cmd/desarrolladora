@@ -24,6 +24,12 @@ import { obtenerCarrito, vaciar } from "./carrito.js";
 import { mapaProductos, mapaProductosFrescos } from "./productos.js";
 import { avisarAdmin } from "./notificar-whatsapp.js";
 import { precio, aviso, escapar } from "./comun.js";
+import {
+  htmlPersonalizacion,
+  conectarPersonalizacion,
+  resumenPersonalizacion,
+  estaVacia
+} from "./personalizacion.js";
 import { iniciarSesionCliente, completarLoginRedirect, guardarDatosCliente, obtenerDatosCliente } from "./auth-cliente.js";
 
 const formulario = document.getElementById("formCompra");
@@ -31,9 +37,103 @@ const totalEl = document.getElementById("totalCompra");
 const botonGoogle = document.getElementById("btnGoogle");
 const botonConfirmar = document.getElementById("btnConfirmar");
 const sesionEl = document.getElementById("sesionCliente");
+const zonaPersonalizar = document.getElementById("zonaPersonalizar");
+const listaPersonalizar = document.getElementById("listaPersonalizar");
 
 let productosCompra = [];
 let total = 0;
+
+// Cuántos productos personalizados van SIN detalles. No bloquea el
+// pedido: solo se avisa al cliente y al administrador.
+let sinDetalles = 0;
+
+// Los recuadros se vuelven a dibujar, pero el listener va en el
+// contenedor de arriba, así que sigue funcionando.
+conectarPersonalizacion(document.getElementById("zonaCheckout"));
+
+// ------------------------------------------------------------
+//  Arma la lista de productos a comprar
+//  Lo usan tanto la vista previa como el recálculo con datos
+//  frescos, para que las dos hagan exactamente lo mismo.
+// ------------------------------------------------------------
+
+function armarCompra(carrito, mapa) {
+
+  total = 0;
+  productosCompra = [];
+  sinDetalles = 0;
+
+  carrito.forEach((item) => {
+
+    const p = mapa[item.id];
+    if (!p) return;
+
+    const subtotal = (Number(p.precio) || 0) * item.cantidad;
+    total += subtotal;
+
+    const personalizacion =
+      item.personalizacion && !estaVacia(item.personalizacion)
+        ? item.personalizacion
+        : null;
+
+    if (p.personalizable && !personalizacion) sinDetalles++;
+
+    const linea = {
+      id: item.id,
+      nombre: p.nombre,
+      cantidad: item.cantidad,
+      precio: Number(p.precio) || 0,
+      stock: Number(p.stock) || 0,
+      subtotal: subtotal,
+      personalizable: !!p.personalizable
+    };
+
+    // Solo se guarda si el cliente puso algo, para no ensuciar la venta.
+    if (personalizacion) linea.personalizacion = personalizacion;
+
+    productosCompra.push(linea);
+  });
+
+  totalEl.textContent = precio(total);
+}
+
+// ------------------------------------------------------------
+//  Cuadro para personalizar los productos del carrito.
+//  Se muestran otra vez aquí (y no solo en el carrito) para que al
+//  cliente no se le pasen por alto sin darse cuenta.
+// ------------------------------------------------------------
+
+function pintarPersonalizacion(carrito, mapa) {
+
+  if (!zonaPersonalizar || !listaPersonalizar) return;
+
+  const personalizables = carrito.filter((item) => {
+    const p = mapa[item.id];
+    return p && p.personalizable;
+  });
+
+  if (!personalizables.length) {
+    zonaPersonalizar.hidden = true;
+    listaPersonalizar.innerHTML = "";
+    return;
+  }
+
+  listaPersonalizar.innerHTML = personalizables.map((item) => {
+
+    const p = mapa[item.id];
+
+    return `
+      <div class="perso-bloque">
+        <p class="perso-producto">
+          ${escapar(p.nombre)}
+          <span class="linea-precio">x${item.cantidad}</span>
+        </p>
+        ${htmlPersonalizacion(item)}
+      </div>`;
+  }).join("");
+
+  zonaPersonalizar.hidden = false;
+}
 
 // ------------------------------------------------------------
 //  Calcula el total con los datos reales de Firestore
@@ -54,27 +154,8 @@ async function calcularTotal() {
 
   const mapa = await mapaProductos(carrito.map((i) => i.id));
 
-  total = 0;
-  productosCompra = [];
-
-  carrito.forEach((item) => {
-    const p = mapa[item.id];
-    if (!p) return;
-
-    const subtotal = (Number(p.precio) || 0) * item.cantidad;
-    total += subtotal;
-
-    productosCompra.push({
-      id: item.id,
-      nombre: p.nombre,
-      cantidad: item.cantidad,
-      precio: Number(p.precio) || 0,
-      stock: Number(p.stock) || 0,
-      subtotal: subtotal
-    });
-  });
-
-  totalEl.textContent = precio(total);
+  armarCompra(carrito, mapa);
+  pintarPersonalizacion(carrito, mapa);
 }
 
 // ------------------------------------------------------------
@@ -87,27 +168,7 @@ async function refrescarCompra() {
   const carrito = obtenerCarrito();
   const mapa = await mapaProductosFrescos(carrito.map((i) => i.id));
 
-  total = 0;
-  productosCompra = [];
-
-  carrito.forEach((item) => {
-    const p = mapa[item.id];
-    if (!p) return;
-
-    const subtotal = (Number(p.precio) || 0) * item.cantidad;
-    total += subtotal;
-
-    productosCompra.push({
-      id: item.id,
-      nombre: p.nombre,
-      cantidad: item.cantidad,
-      precio: Number(p.precio) || 0,
-      stock: Number(p.stock) || 0,
-      subtotal: subtotal
-    });
-  });
-
-  totalEl.textContent = precio(total);
+  armarCompra(carrito, mapa);
 }
 
 // ------------------------------------------------------------
@@ -329,6 +390,30 @@ formulario.addEventListener("submit", async (e) => {
       return;
     }
 
+    // Productos personalizados sin detalles: el pedido SÍ pasa (no es
+    // obligatorio), pero se le avisa al cliente.
+    if (sinDetalles > 0) {
+      aviso(
+        sinDetalles === 1
+          ? "Un producto personalizado va sin detalles: te escribiremos para pedírtelos."
+          : sinDetalles + " productos personalizados van sin detalles: te escribiremos para pedírtelos.",
+        "info"
+      );
+    }
+
+    // Firestore no acepta documentos de más de 1 MB. Con las imágenes
+    // ya comprimidas es difícil llegar, pero se avisa con claridad en
+    // vez de dejar que falle con un error raro.
+    if (JSON.stringify(productosCompra).length > 800000) {
+      aviso(
+        "Tu pedido lleva demasiadas imágenes de referencia. " +
+        "Quita alguna desde el carrito e intenta otra vez.",
+        "error"
+      );
+      restaurarBoton();
+      return;
+    }
+
     // 1. Guardar el pedido (con la cuenta de Google que lo hizo)
     await addDoc(collection(db, "ventas"), {
       cliente: nombre,
@@ -370,9 +455,18 @@ formulario.addEventListener("submit", async (e) => {
     }
 
     // 3. Avisar por WhatsApp (no bloquea la compra)
-    const lista = productosCompra
-      .map((p) => p.nombre + " x" + p.cantidad)
-      .join(", ");
+    //    Se detalla lo que el cliente pidió personalizar (y se avisa
+    //    si algún personalizado quedó sin detalles).
+    const lista = productosCompra.map((p) => {
+
+      let texto = p.nombre + " x" + p.cantidad;
+      const detalle = resumenPersonalizacion(p.personalizacion);
+
+      if (detalle) texto += " (personalizado: " + detalle + ")";
+      else if (p.personalizable) texto += " (personalizado: SIN DETALLES)";
+
+      return texto;
+    }).join("\n");
 
     avisarAdmin(
       "🛒 Nuevo pedido\n" +
@@ -380,7 +474,7 @@ formulario.addEventListener("submit", async (e) => {
       `Cuenta Google: ${usuario.email || "-"}\n` +
       `Tel: ${telefono}\n` +
       `Dirección: ${direccion}\n` +
-      `Productos: ${lista}\n` +
+      `Productos:\n${lista}\n` +
       `Notas: ${notas || "Ninguna"}\n` +
       `Total: ${precio(total)}`
     );

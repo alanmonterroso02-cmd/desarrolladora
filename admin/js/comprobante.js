@@ -284,6 +284,28 @@ function cabeceraTabla(doc, y) {
 }
 
 // ------------------------------------------------------------
+//  Personalización pedida por el cliente (si la hay)
+//  Se escribe debajo del nombre del producto, en letra chica.
+// ------------------------------------------------------------
+
+function textoPersonalizacion(p) {
+
+  const per = p.personalizacion || {};
+  const detalle = String(per.descripcion || "").trim();
+  const tieneImagen = !!per.imagen;
+
+  if (!detalle && !tieneImagen) {
+    // Producto personalizable pero sin detalles: el pedido pasó igual.
+    return p.personalizable ? "Personalizado: sin detalles todavía" : "";
+  }
+
+  if (!detalle) return "Personalizado: con imagen de referencia";
+
+  return "Personalizado: " + detalle +
+    (tieneImagen ? " (con imagen de referencia)" : "");
+}
+
+// ------------------------------------------------------------
 //  Filas de productos
 // ------------------------------------------------------------
 
@@ -303,7 +325,14 @@ function tablaProductos(doc, y, productos, contexto) {
 
     const nombre = p.nombre || "Producto";
     const trozos = doc.splitTextToSize(nombre, COL.cant - COL.producto - 14);
-    const alto = Math.max(8.5, trozos.length * 4.4 + 4);
+
+    const personalizado = textoPersonalizacion(p);
+    const trozosPersonalizado = personalizado
+      ? doc.splitTextToSize(personalizado, COL.cant - COL.producto - 20)
+      : [];
+
+    const renglones = trozos.length + trozosPersonalizado.length;
+    const alto = Math.max(8.5, renglones * 4.4 + 4);
 
     // Salto de página: se repite la cabecera de la tabla y, si es un
     // pedido que quedó partido, también su fecha, para que se entienda
@@ -329,6 +358,20 @@ function tablaProductos(doc, y, productos, contexto) {
     doc.setTextColor.apply(doc, COLOR.texto);
 
     doc.text(trozos, COL.producto + 3, y + 5);
+
+    if (trozosPersonalizado.length) {
+
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8.5);
+      doc.setTextColor.apply(doc, COLOR.suave);
+      doc.text(trozosPersonalizado, COL.producto + 3,
+        y + 5 + trozos.length * 4.4);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor.apply(doc, COLOR.texto);
+    }
+
     doc.text(String(p.cantidad || 1), COL.cant, y + 5, { align: "right" });
     doc.text(precio(p.precio), COL.precio, y + 5, { align: "right" });
     doc.text(precio(subtotalDe(p)), COL.subtotal - 3, y + 5, { align: "right" });

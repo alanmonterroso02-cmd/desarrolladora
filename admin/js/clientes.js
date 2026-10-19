@@ -31,6 +31,7 @@ import {
 import { protegerPagina, conectarSalir } from "./sesion.js";
 import { aviso, escapar, precio } from "../../js/comun.js";
 import { comprobanteDePedido, comprobanteDeCliente } from "./comprobante.js";
+import { htmlProductos, conectarMiniaturas } from "./personalizados.js";
 
 let clientes = [];
 let pedidos = [];
@@ -319,9 +320,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const estado = v.estado || "Pendiente";
 
-      const lista = (v.productos || [])
-        .map((p) => escapar(p.nombre) + " x" + (p.cantidad || 1))
-        .join("<br>");
+      const lista = htmlProductos(v.productos);
 
       return `
         <tr>
@@ -410,9 +409,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const estado = v.estado || "Pendiente";
 
-      const productos = (v.productos || [])
-        .map((p) => escapar(p.nombre) + " x" + (p.cantidad || 1))
-        .join("<br>");
+      const productos = htmlProductos(v.productos);
 
       return `
         <tr>
@@ -548,6 +545,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   buscador.addEventListener("input", filtrar);
+
+  // Las imágenes de referencia se agrandan al tocarlas.
+  conectarMiniaturas(tabla);
+  conectarMiniaturas(zonaSueltos);
 
   // ---------- Arrancar ----------
 
