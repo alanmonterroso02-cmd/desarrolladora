@@ -25,8 +25,9 @@ import { mapaProductos, mapaProductosFrescos } from "./productos.js";
 import { avisarAdmin } from "./notificar-whatsapp.js";
 import { precio, aviso, escapar } from "./comun.js";
 import {
-  resumenPersonalizacion,
-  estaVacia
+  listaPiezas,
+  piezaConDatos,
+  resumenPersonalizacion
 } from "./personalizacion.js";
 import { iniciarSesionCliente, completarLoginRedirect, guardarDatosCliente, obtenerDatosCliente } from "./auth-cliente.js";
 
@@ -63,10 +64,12 @@ function armarCompra(carrito, mapa) {
     const subtotal = (Number(p.precio) || 0) * item.cantidad;
     total += subtotal;
 
-    const personalizacion =
-      item.personalizacion && !estaVacia(item.personalizacion)
-        ? item.personalizacion
-        : null;
+    // La personalización va por unidad: si el cliente pidió 2, puede
+    // querer cada una distinta. Se completan las piezas que falten
+    // para que el panel y el comprobante vean la cantidad exacta.
+    const cantidad = Math.max(1, Number(item.cantidad) || 1);
+    const piezas = listaPiezas(item.personalizacion, cantidad);
+    const personalizacion = piezas.some(piezaConDatos) ? { piezas: piezas } : null;
 
     if (p.personalizable && !personalizacion) sinDetalles++;
 

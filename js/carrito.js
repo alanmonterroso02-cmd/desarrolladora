@@ -54,6 +54,33 @@ export function agregarAlCarrito(id, nombre = "Producto") {
 }
 
 // ------------------------------------------------------------
+//  La personalización sigue a la cantidad: cada unidad tiene su
+//  pieza (imagen + descripción). Se agrega una pieza vacía al sumar
+//  y se quita la última al restar.
+// ------------------------------------------------------------
+
+function ajustarPiezas(item) {
+
+  if (!item.personalizacion || !Array.isArray(item.personalizacion.piezas)) return;
+
+  const cantidad = Math.max(1, Number(item.cantidad) || 1);
+  const piezas = item.personalizacion.piezas.slice(0, cantidad);
+
+  while (piezas.length < cantidad) {
+    piezas.push({ descripcion: "", imagen: "" });
+  }
+
+  const hayAlgo = piezas.some((p) => (p.descripcion || "").trim() || p.imagen);
+
+  if (!hayAlgo) {
+    delete item.personalizacion;
+    return;
+  }
+
+  item.personalizacion.piezas = piezas;
+}
+
+// ------------------------------------------------------------
 //  Sumar / restar / eliminar
 // ------------------------------------------------------------
 
@@ -62,6 +89,7 @@ export function sumar(id) {
   const producto = carrito.find((p) => p.id === id);
   if (!producto) return;
   producto.cantidad++;
+  ajustarPiezas(producto);
   guardar(carrito);
 }
 
@@ -72,6 +100,7 @@ export function restar(id) {
 
   if (producto.cantidad > 1) {
     producto.cantidad--;
+    ajustarPiezas(producto);
   } else {
     carrito = carrito.filter((p) => p.id !== id);
   }
@@ -94,29 +123,41 @@ export function cantidadTotal() {
 }
 
 // ------------------------------------------------------------
-//  Personalización de un producto (imagen + descripción)
+//  Personalización de un producto (imágenes y descripciones)
+//
+//  Cada unidad puede llevar lo suyo: si el cliente pide 2 llaveros,
+//  puede subir dos imágenes distintas. Se guarda una pieza por
+//  unidad, en productos[i].personalizacion.piezas.
 //
 //  Solo la usan los productos marcados como personalizables. Si el
 //  cliente deja todo vacío se borra la personalización, para no
 //  guardar datos de más.
 // ------------------------------------------------------------
 
-export function guardarPersonalizacion(id, personalizacion) {
+const LARGO_DESCRIPCION = 600;
+
+function limpiarPieza(pieza) {
+  return {
+    descripcion: String((pieza && pieza.descripcion) || "")
+      .trim()
+      .slice(0, LARGO_DESCRIPCION),
+    imagen: (pieza && pieza.imagen) || ""
+  };
+}
+
+export function guardarPersonalizacion(id, piezas) {
 
   const carrito = obtenerCarrito();
   const item = carrito.find((p) => p.id === id);
   if (!item) return false;
 
-  const descripcion = String(
-    (personalizacion && personalizacion.descripcion) || ""
-  ).trim().slice(0, 600);
+  const lista = (Array.isArray(piezas) ? piezas : []).map(limpiarPieza);
+  const hayAlgo = lista.some((p) => p.descripcion || p.imagen);
 
-  const imagen = (personalizacion && personalizacion.imagen) || "";
-
-  if (!descripcion && !imagen) {
+  if (!hayAlgo) {
     delete item.personalizacion;
   } else {
-    item.personalizacion = { descripcion: descripcion, imagen: imagen };
+    item.personalizacion = { piezas: lista };
   }
 
   return guardar(carrito);

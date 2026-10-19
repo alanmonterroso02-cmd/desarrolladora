@@ -7,6 +7,11 @@
 //  que el cliente suba una imagen de referencia y escriba lo que
 //  necesita: nombre a grabar, colores, tamaño, etc.
 //
+//  Si el cliente lleva VARIAS unidades del mismo producto, cada
+//  unidad tiene su propio recuadro (Pieza 1, Pieza 2…), con su
+//  imagen y su descripción. Así puede pedir dos llaveros distintos
+//  dentro del mismo pedido.
+//
 //  Todo se guarda dentro del propio carrito (localStorage). Así el
 //  cliente no pierde lo que escribió si recarga la página o si el
 //  navegador recarga al iniciar sesión con Google.
@@ -29,8 +34,8 @@ import { aviso, escapar } from "./comun.js";
 const LADO_MAXIMO = 700;
 
 // Calidad del JPEG y tope del texto ya en base64. 90000 letras eran
-// unos 65 KB de imagen: con 3 o 4 personalizados el pedido sigue
-// entrando cómodo en Firestore.
+// unos 65 KB de imagen: con varias piezas el pedido sigue entrando
+// cómodo en Firestore (el checkout corta a los 800 KB).
 const CALIDAD_INICIAL = 0.72;
 const PESO_MAXIMO = 90000;
 
@@ -38,16 +43,78 @@ const PESO_MAXIMO = 90000;
 const LARGO_MAXIMO = 600;
 
 // ------------------------------------------------------------
-//  ¿Está vacía la personalización?
+//  De lo guardado a una lista de piezas
+//
+//  Se entienden los dos formatos:
+//    - nuevo:  { piezas: [ { descripcion, imagen }, … ] }
+//    - viejo:  { descripcion, imagen }   (pedidos de antes)
+//
+//  Si se pasa "cantidad", la lista se ajusta al número de unidades:
+//  se rellenan las que falten con piezas vacías y se recortan las
+//  que sobren.
+// ------------------------------------------------------------
+
+export function listaPiezas(personalizacion, cantidad = 0) {
+
+  const per = personalizacion || {};
+  let guardadas;
+
+  if (Array.isArray(per.piezas)) {
+    guardadas = per.piezas;
+  } else if (per.descripcion || per.imagen) {
+    guardadas = [{ descripcion: per.descripcion, imagen: per.imagen }];
+  } else {
+    guardadas = [];
+  }
+
+  const lista = guardadas.map((pieza) => ({
+    descripcion: String((pieza && pieza.descripcion) || ""),
+    imagen: String((pieza && pieza.imagen) || "")
+  }));
+
+  if (cantidad > 0) {
+    while (lista.length < cantidad) lista.push({ descripcion: "", imagen: "" });
+    if (lista.length > cantidad) lista.length = cantidad;
+  }
+
+  return lista;
+}
+
+// ------------------------------------------------------------
+//  ¿Esta pieza trae algo?
+// ------------------------------------------------------------
+
+export function piezaConDatos(pieza) {
+
+  if (!pieza) return false;
+
+  return !!(String(pieza.descripcion || "").trim() || pieza.imagen);
+}
+
+// ------------------------------------------------------------
+//  ¿No hay nada en ninguna pieza?
 // ------------------------------------------------------------
 
 export function estaVacia(personalizacion) {
 
-  if (!personalizacion) return true;
+  return !listaPiezas(personalizacion).some(piezaConDatos);
+}
 
-  const descripcion = String(personalizacion.descripcion || "").trim();
+// ------------------------------------------------------------
+//  Texto corto de una sola pieza
+// ------------------------------------------------------------
 
-  return !descripcion && !personalizacion.imagen;
+function textoPieza(pieza) {
+
+  const partes = [];
+
+  if (String((pieza && pieza.descripcion) || "").trim()) {
+    partes.push(String(pieza.descripcion).trim());
+  }
+
+  if (pieza && pieza.imagen) partes.push("con imagen de referencia");
+
+  return partes.join(" · ");
 }
 
 // ------------------------------------------------------------
@@ -56,17 +123,20 @@ export function estaVacia(personalizacion) {
 
 export function resumenPersonalizacion(personalizacion) {
 
-  if (estaVacia(personalizacion)) return "";
+  const piezas = listaPiezas(personalizacion);
 
-  const partes = [];
+  if (!piezas.some(piezaConDatos)) return "";
 
-  if (String(personalizacion.descripcion || "").trim()) {
-    partes.push(String(personalizacion.descripcion).trim());
-  }
+  // Una sola unidad: como siempre.
+  if (piezas.length <= 1) return textoPieza(piezas[0]);
 
-  if (personalizacion.imagen) partes.push("con imagen de referencia");
-
-  return partes.join(" · ");
+  // Varias unidades: se numera cada pieza.
+  return piezas
+    .map((pieza, i) => {
+      const contenido = piezaConDatos(pieza) ? textoPieza(pieza) : "sin detalles";
+      return "Pieza " + (i + 1) + ": " + contenido;
+    })
+    .join(" | ");
 }
 
 // ------------------------------------------------------------
@@ -177,42 +247,46 @@ function codificar(img, original, factor) {
 //  Texto del estado (no es un error, es un recordatorio)
 // ------------------------------------------------------------
 
-function textoEstado(completo) {
+function textoEstado(completo, varias) {
 
-  return completo
-    ? "Listo, ya lo tenemos en cuenta."
+  if (completo) {
+    return varias ? "Listo." : "Listo, ya lo tenemos en cuenta.";
+  }
+
+  return varias
+    ? "Opcional: si la dejas vacía, esta pieza va sin detalles."
     : "Es opcional: si lo dejas vacío, te escribiremos para pedirte los detalles.";
 }
 
 // ------------------------------------------------------------
-//  Recuadro de personalización de un producto del carrito
+//  Recuadro de una pieza (una unidad del producto)
 // ------------------------------------------------------------
 
-export function htmlPersonalizacion(item) {
+function bloquePieza(id, indice, pieza, cantidad) {
 
-  const per = item.personalizacion || {};
+  const varias = cantidad > 1;
 
-  const descripcion = per.descripcion || "";
-  const imagen = per.imagen || "";
-  const completo = !estaVacia(per);
+  const descripcion = pieza.descripcion || "";
+  const imagen = pieza.imagen || "";
+  const completo = piezaConDatos(pieza);
 
   const vista = imagen
     ? `<img class="perso-vista" src="${escapar(imagen)}" alt="Tu referencia"
             loading="lazy" decoding="async">`
     : `<img class="perso-vista" alt="Tu referencia" style="display:none">`;
 
+  const titulo = varias
+    ? `<p class="perso-pieza-titulo">Pieza ${indice + 1} de ${cantidad}</p>`
+    : "";
+
+  const pista = varias
+    ? "Ej: para esta pieza quiero el nombre Ana, colores azul y blanco…"
+    : "Ej: quiero que diga Ana, colores azul y blanco, de 20 cm de ancho…";
+
   return `
-    <div class="perso">
+    <div class="perso-pieza" data-pieza="${indice}">
 
-      <p class="perso-cabecera">
-        <span class="perso-marca">Personalizable</span>
-        Cuéntanos cómo lo quieres
-      </p>
-
-      <p class="perso-ayuda">
-        Sube una imagen de referencia y describe lo que necesitas:
-        nombre a grabar, colores, tamaño…
-      </p>
+      ${titulo}
 
       <div class="perso-imagenes">
 
@@ -223,11 +297,13 @@ export function htmlPersonalizacion(item) {
           <label class="perso-boton">
             <span data-perso-etiqueta>${imagen ? "Cambiar imagen" : "Subir imagen"}</span>
             <input type="file" accept="image/*"
-                   data-perso-archivo="${escapar(item.id)}">
+                   data-perso-archivo="${escapar(id)}"
+                   data-perso-pieza="${indice}">
           </label>
 
           <button type="button" class="btn-texto"
-                  data-perso-quitar="${escapar(item.id)}"
+                  data-perso-quitar="${escapar(id)}"
+                  data-perso-pieza="${indice}"
                   ${imagen ? "" : 'style="display:none"'}>Quitar imagen</button>
 
         </div>
@@ -235,44 +311,97 @@ export function htmlPersonalizacion(item) {
       </div>
 
       <textarea class="perso-texto" rows="3" maxlength="${LARGO_MAXIMO}"
-        data-perso-descripcion="${escapar(item.id)}"
-        placeholder="Ej: quiero que diga Ana, colores azul y blanco, de 20 cm de ancho…">${escapar(descripcion)}</textarea>
+        data-perso-descripcion="${escapar(id)}"
+        data-perso-pieza="${indice}"
+        placeholder="${escapar(pista)}">${escapar(descripcion)}</textarea>
 
       <p class="perso-estado ${completo ? "perso-listo" : ""}"
-         data-perso-estado="${escapar(item.id)}">${textoEstado(completo)}</p>
+         data-perso-estado="${escapar(id)}"
+         data-perso-pieza="${indice}">${textoEstado(completo, varias)}</p>
 
     </div>`;
 }
 
 // ------------------------------------------------------------
-//  Guardar un cambio en el carrito
+//  Recuadro de personalización de un producto del carrito
+//  Si el cliente lleva varias unidades, se dibuja una pieza por
+//  unidad para que pueda pedirlas diferentes.
 // ------------------------------------------------------------
 
-function guardar(id, cambios) {
+export function htmlPersonalizacion(item) {
+
+  const cantidad = Math.max(1, Number(item.cantidad) || 1);
+  const piezas = listaPiezas(item.personalizacion, cantidad);
+  const varias = cantidad > 1;
+
+  const ayuda = varias
+    ? "Puedes hacerlas diferentes: describe y sube una imagen en cada pieza. " +
+      "Si las quieres iguales, llena la primera y deja las demás vacías."
+    : "Sube una imagen de referencia y describe lo que necesitas: " +
+      "nombre a grabar, colores, tamaño…";
+
+  const bloques = piezas
+    .map((pieza, i) => bloquePieza(item.id, i, pieza, cantidad))
+    .join("");
+
+  return `
+    <div class="perso">
+
+      <p class="perso-cabecera">
+        <span class="perso-marca">Personalizable</span>
+        Cuéntanos cómo lo quieres
+      </p>
+
+      <p class="perso-ayuda">${ayuda}</p>
+
+      ${bloques}
+
+    </div>`;
+}
+
+// ------------------------------------------------------------
+//  Guardar un cambio de UNA pieza en el carrito
+// ------------------------------------------------------------
+
+function guardarPieza(id, indice, cambios) {
 
   const item = obtenerCarrito().find((x) => x.id === id);
   if (!item) return false;
 
-  const actual = item.personalizacion || {};
+  const cantidad = Math.max(1, Number(item.cantidad) || 1);
+  const piezas = listaPiezas(item.personalizacion, cantidad);
+  const pieza = piezas[indice] || { descripcion: "", imagen: "" };
 
-  return guardarPersonalizacion(id, {
-    descripcion: cambios.descripcion != null
-      ? cambios.descripcion
-      : actual.descripcion,
-    imagen: cambios.imagen != null ? cambios.imagen : actual.imagen
-  });
+  piezas[indice] = {
+    descripcion: cambios.descripcion != null ? cambios.descripcion : pieza.descripcion,
+    imagen: cambios.imagen != null ? cambios.imagen : pieza.imagen
+  };
+
+  return guardarPersonalizacion(id, piezas);
 }
 
-function refrescarEstado(contenedor, id) {
+function refrescarEstado(contenedor, id, indice) {
 
-  const estado = contenedor.querySelector(`[data-perso-estado="${id}"]`);
+  const estado = contenedor.querySelector(
+    `[data-perso-estado="${id}"][data-perso-pieza="${indice}"]`
+  );
+
   if (!estado) return;
 
   const item = obtenerCarrito().find((x) => x.id === id);
-  const completo = !estaVacia(item && item.personalizacion);
 
-  estado.textContent = textoEstado(completo);
+  const cantidad = Math.max(1, Number(item && item.cantidad) || 1);
+  const piezas = listaPiezas(item && item.personalizacion, cantidad);
+
+  const completo = piezaConDatos(piezas[indice]);
+
+  estado.textContent = textoEstado(completo, cantidad > 1);
   estado.classList.toggle("perso-listo", completo);
+}
+
+// El recuadro de la pieza al que pertenece un elemento.
+function cajaDe(elemento) {
+  return elemento ? elemento.closest(".perso-pieza") : null;
 }
 
 // ------------------------------------------------------------
@@ -287,6 +416,8 @@ export function conectarPersonalizacion(contenedor) {
 
   let temporizador = null;
 
+  const indiceDe = (elemento) => Number(elemento.dataset.persoPieza) || 0;
+
   // ---- Descripción (se guarda a los 500 ms de dejar de escribir) ----
 
   contenedor.addEventListener("input", (e) => {
@@ -295,13 +426,14 @@ export function conectarPersonalizacion(contenedor) {
     if (!area) return;
 
     const id = area.dataset.persoDescripcion;
+    const indice = indiceDe(area);
     const valor = area.value;
 
     clearTimeout(temporizador);
 
     temporizador = setTimeout(() => {
-      guardar(id, { descripcion: valor });
-      refrescarEstado(contenedor, id);
+      guardarPieza(id, indice, { descripcion: valor });
+      refrescarEstado(contenedor, id, indice);
     }, 500);
   });
 
@@ -313,10 +445,11 @@ export function conectarPersonalizacion(contenedor) {
     if (!area) return;
 
     const id = area.dataset.persoDescripcion;
+    const indice = indiceDe(area);
 
     clearTimeout(temporizador);
-    guardar(id, { descripcion: area.value });
-    refrescarEstado(contenedor, id);
+    guardarPieza(id, indice, { descripcion: area.value });
+    refrescarEstado(contenedor, id, indice);
   });
 
   // ---- Imagen elegida ----
@@ -330,7 +463,12 @@ export function conectarPersonalizacion(contenedor) {
     if (!archivo) return;
 
     const id = input.dataset.persoArchivo;
-    const estado = contenedor.querySelector(`[data-perso-estado="${id}"]`);
+    const indice = indiceDe(input);
+    const caja = cajaDe(input);
+
+    const estado = contenedor.querySelector(
+      `[data-perso-estado="${id}"][data-perso-pieza="${indice}"]`
+    );
 
     if (estado) estado.textContent = "Preparando la imagen…";
 
@@ -338,18 +476,13 @@ export function conectarPersonalizacion(contenedor) {
 
       const imagen = await comprimirImagen(archivo);
 
-      if (!guardar(id, { imagen: imagen })) {
+      if (!guardarPieza(id, indice, { imagen: imagen })) {
         throw new Error("No cupo la imagen en el carrito. Prueba con una más liviana.");
       }
 
-      const caja = input.closest(".perso");
       const vista = caja ? caja.querySelector(".perso-vista") : null;
-      const quitar = caja
-        ? caja.querySelector(`[data-perso-quitar="${id}"]`)
-        : null;
-      const etiqueta = caja
-        ? caja.querySelector("[data-perso-etiqueta]")
-        : null;
+      const quitar = caja ? caja.querySelector("[data-perso-quitar]") : null;
+      const etiqueta = caja ? caja.querySelector("[data-perso-etiqueta]") : null;
 
       if (vista) {
         vista.src = imagen;
@@ -368,7 +501,7 @@ export function conectarPersonalizacion(contenedor) {
       input.value = "";
     }
 
-    refrescarEstado(contenedor, id);
+    refrescarEstado(contenedor, id, indice);
   });
 
   // ---- Quitar la imagen ----
@@ -379,17 +512,14 @@ export function conectarPersonalizacion(contenedor) {
     if (!boton) return;
 
     const id = boton.dataset.persoQuitar;
+    const indice = indiceDe(boton);
+    const caja = cajaDe(boton);
 
-    guardar(id, { imagen: "" });
+    guardarPieza(id, indice, { imagen: "" });
 
-    const caja = boton.closest(".perso");
     const vista = caja ? caja.querySelector(".perso-vista") : null;
-    const input = caja
-      ? caja.querySelector(`[data-perso-archivo="${id}"]`)
-      : null;
-    const etiqueta = caja
-      ? caja.querySelector("[data-perso-etiqueta]")
-      : null;
+    const input = caja ? caja.querySelector("[data-perso-archivo]") : null;
+    const etiqueta = caja ? caja.querySelector("[data-perso-etiqueta]") : null;
 
     if (vista) {
       vista.removeAttribute("src");
@@ -401,6 +531,6 @@ export function conectarPersonalizacion(contenedor) {
 
     boton.style.display = "none";
 
-    refrescarEstado(contenedor, id);
+    refrescarEstado(contenedor, id, indice);
   });
 }

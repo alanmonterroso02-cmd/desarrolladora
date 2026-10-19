@@ -118,6 +118,8 @@ function abrirDetalle(id) {
       ? `<p class="modal-perso">
            <strong>Personalizable:</strong> al agregarlo al carrito vas a
            poder subir una imagen de referencia y describir cómo lo quieres.
+           Si llevas varias unidades, puedes personalizar cada una por
+           separado.
          </p>`
       : ""}
     <button class="btn btn-ancho" id="modalAgregar">

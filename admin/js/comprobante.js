@@ -18,6 +18,7 @@
 // ============================================================
 
 import { precio } from "../../js/comun.js";
+import { listaPiezas, piezaConDatos } from "../../js/personalizacion.js";
 
 const NEGOCIO = {
   nombre: "Asociación Tecnológica Monterroso",
@@ -290,19 +291,38 @@ function cabeceraTabla(doc, y) {
 
 function textoPersonalizacion(p) {
 
-  const per = p.personalizacion || {};
-  const detalle = String(per.descripcion || "").trim();
-  const tieneImagen = !!per.imagen;
+  const piezas = listaPiezas(p.personalizacion);
 
-  if (!detalle && !tieneImagen) {
+  if (!piezas.some(piezaConDatos)) {
     // Producto personalizable pero sin detalles: el pedido pasó igual.
     return p.personalizable ? "Personalizado: sin detalles todavía" : "";
   }
 
-  if (!detalle) return "Personalizado: con imagen de referencia";
+  // Una sola unidad: como siempre.
+  if (piezas.length <= 1) {
 
-  return "Personalizado: " + detalle +
-    (tieneImagen ? " (con imagen de referencia)" : "");
+    const pieza = piezas[0];
+    const detalle = String(pieza.descripcion || "").trim();
+
+    if (!detalle) return "Personalizado: con imagen de referencia";
+
+    return "Personalizado: " + detalle +
+      (pieza.imagen ? " (con imagen de referencia)" : "");
+  }
+
+  // Varias unidades: un renglón por pieza (cada una puede ser distinta).
+  const renglones = piezas.map((pieza, i) => {
+
+    const detalle = String(pieza.descripcion || "").trim();
+    const numero = "Pieza " + (i + 1) + ": ";
+
+    if (!detalle && !pieza.imagen) return numero + "sin detalles";
+    if (!detalle) return numero + "imagen de referencia";
+
+    return numero + detalle + (pieza.imagen ? " (con imagen)" : "");
+  });
+
+  return "Personalizado:\n" + renglones.join("\n");
 }
 
 // ------------------------------------------------------------

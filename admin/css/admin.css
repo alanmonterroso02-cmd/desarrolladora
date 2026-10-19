@@ -519,6 +519,11 @@ table .avatar img {
   margin-top: 5px;
 }
 
+/* Varias unidades personalizadas: una línea por pieza */
+.perso-admin-lista .perso-admin + .perso-admin {
+  margin-top: 2px;
+}
+
 .perso-admin-texto {
   color: #38bdf8;
   font-size: 12px;
