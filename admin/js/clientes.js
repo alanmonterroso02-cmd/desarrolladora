@@ -30,6 +30,7 @@ import {
 
 import { protegerPagina, conectarSalir } from "./sesion.js";
 import { aviso, escapar, precio } from "../../js/comun.js";
+import { comprobanteDePedido, comprobanteDeCliente } from "./comprobante.js";
 
 let clientes = [];
 let pedidos = [];
@@ -299,6 +300,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           ${c.numPedidos
             ? `<button class="btn-enlace" data-ver="${escapar(c.id)}">
                  ${abiertos[c.id] ? "Ocultar" : `Ver ${c.numPedidos} ${etiquetaPedidos}`}
+               </button>
+               <br>
+               <button class="btn-enlace" data-comp-cliente="${escapar(c.id)}">
+                 Comprobante
                </button>`
             : `<span class="mini">—</span>`}
         </td>
@@ -327,6 +332,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           </td>
           <td>${precio(v.total)}</td>
           <td><span class="insignia ${claseEstado(estado)}">${escapar(estado)}</span></td>
+          <td>
+            <button class="btn-enlace" data-comp-pedido="${escapar(v.id)}">
+              Comprobante
+            </button>
+          </td>
         </tr>`;
     }).join("");
 
@@ -342,6 +352,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   <th>Productos</th>
                   <th>Total</th>
                   <th>Estado</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>${filas}</tbody>
@@ -414,6 +425,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td>${productos || "-"}</td>
           <td>${precio(v.total)}</td>
           <td><span class="insignia ${claseEstado(estado)}">${escapar(estado)}</span></td>
+          <td>
+            <button class="btn-enlace" data-comp-suelto="${escapar(v.id)}">
+              Comprobante
+            </button>
+          </td>
         </tr>`;
     }).join("");
 
@@ -439,6 +455,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <th>Productos</th>
                 <th>Total</th>
                 <th>Estado</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>${filas}</tbody>
@@ -468,18 +485,67 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ---------- Abrir / cerrar el historial ----------
 
-  tabla.addEventListener("click", (e) => {
+  tabla.addEventListener("click", async (e) => {
 
-    const boton = e.target.closest("[data-ver]");
+    // Desplegar el historial
+    const ver = e.target.closest("[data-ver]");
+
+    if (ver) {
+      const id = ver.dataset.ver;
+
+      if (abiertos[id]) delete abiertos[id];
+      else abiertos[id] = true;
+
+      filtrar();
+      return;
+    }
+
+    // Comprobante de TODOS los pedidos del cliente
+    const deCliente = e.target.closest("[data-comp-cliente]");
+
+    if (deCliente) {
+      const c = clientes.find((x) => x.id === deCliente.dataset.compCliente);
+      if (c) await generar(() => comprobanteDeCliente(c));
+      return;
+    }
+
+    // Comprobante de UN pedido del historial
+    const dePedido = e.target.closest("[data-comp-pedido]");
+
+    if (dePedido) {
+      const id = dePedido.dataset.compPedido;
+      const c = clientes.find((x) => x.pedidos.some((v) => v.id === id));
+      const v = c ? c.pedidos.find((x) => x.id === id) : null;
+
+      if (v) await generar(() => comprobanteDePedido(v, c));
+    }
+  });
+
+  // Comprobante de un pedido sin cliente registrado
+  zonaSueltos.addEventListener("click", async (e) => {
+
+    const boton = e.target.closest("[data-comp-suelto]");
     if (!boton) return;
 
-    const id = boton.dataset.ver;
-
-    if (abiertos[id]) delete abiertos[id];
-    else abiertos[id] = true;
-
-    filtrar();
+    const v = sueltos.find((x) => x.id === boton.dataset.compSuelto);
+    if (v) await generar(() => comprobanteDePedido(v, null));
   });
+
+  // ---------- Generar el PDF ----------
+
+  async function generar(armar) {
+
+    try {
+      // Se avisa porque la librería del PDF se descarga solo la
+      // primera vez (después queda guardada en caché).
+      aviso("Preparando el comprobante…");
+      await armar();
+      aviso("Comprobante listo");
+    } catch (error) {
+      console.error(error);
+      aviso("No se pudo generar el PDF. Revisa tu conexión.", "error");
+    }
+  }
 
   buscador.addEventListener("input", filtrar);
 

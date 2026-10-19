@@ -22,6 +22,7 @@ import {
 
 import { protegerPagina, conectarSalir } from "./sesion.js";
 import { aviso, escapar, precio } from "../../js/comun.js";
+import { comprobanteDePedido } from "./comprobante.js";
 
 const ESTADOS = ["Pendiente", "Trabajado", "Entregado", "Cancelado"];
 
@@ -136,6 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           </select>
         </td>
         <td>
+          <button class="btn btn-chico btn-gris" data-comprobante="${v.id}">Comprobante</button>
           <button class="btn btn-chico btn-rojo" data-eliminar="${v.id}">Eliminar</button>
         </td>
       </tr>`;
@@ -186,6 +188,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!selector) return;
 
     await cambiarEstado(selector.dataset.estado, selector.value);
+  });
+
+  // Comprobante en PDF
+  tabla.addEventListener("click", async (e) => {
+
+    const boton = e.target.closest("[data-comprobante]");
+    if (!boton) return;
+
+    const v = ventas.find((x) => x.id === boton.dataset.comprobante);
+    if (!v) return;
+
+    try {
+      aviso("Preparando el comprobante…");
+      await comprobanteDePedido(v, null);
+      aviso("Comprobante listo");
+    } catch (error) {
+      console.error(error);
+      aviso("No se pudo generar el PDF. Revisa tu conexión.", "error");
+    }
   });
 
   // Eliminar pedido
