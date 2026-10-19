@@ -42,20 +42,47 @@
   <div class="principal">
 
     <div class="topbar">
-      <h1>Clientes Registrados</h1>
+      <h1>Control por Cliente</h1>
       <span class="usuario" id="usuarioActual">Administrador</span>
     </div>
 
     <div class="zona">
 
+      <div class="rejilla rejilla-4">
+
+        <div class="tarjeta">
+          <h3>Clientes registrados</h3>
+          <div class="numero" id="totalClientes">0</div>
+          <div class="nota">Con cuenta en la tienda</div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Con pedidos</h3>
+          <div class="numero" id="totalConPedidos">0</div>
+          <div class="nota">Ya te han comprado</div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Por entregar</h3>
+          <div class="numero" id="totalPorEntregar">0</div>
+          <div class="nota">Pendientes y en proceso</div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Total pedido</h3>
+          <div class="numero" id="totalPedido">Q0</div>
+          <div class="nota">Sin contar cancelados</div>
+        </div>
+
+      </div>
+
+      <h2 class="titulo-seccion">Pedidos por cliente</h2>
+
       <div class="tarjeta">
 
-        <p class="mini" style="margin-bottom:15px">
-          Clientes: <strong id="totalClientes">0</strong>
-        </p>
-
         <div class="campo">
-          <input type="text" id="buscarCliente" placeholder="Buscar por nombre, correo o teléfono…">
+          <input type="text" id="buscarCliente"
+                 placeholder="Buscar por nombre, correo o teléfono…">
         </div>
 
         <div class="tabla-scroll">
@@ -63,19 +90,26 @@
             <thead>
               <tr>
                 <th>#</th>
-                <th>Nombre</th>
-                <th>Correo</th>
-                <th>Teléfono</th>
+                <th>Cliente</th>
+                <th>Contacto</th>
+                <th>Pedidos</th>
+                <th>Total</th>
+                <th>Última compra</th>
                 <th>Registro</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="tablaClientes">
-              <tr><td colspan="5" class="mini">Cargando…</td></tr>
+              <tr><td colspan="8" class="mini">Cargando…</td></tr>
             </tbody>
           </table>
         </div>
 
       </div>
+
+      <!-- Aquí se pintan los pedidos que no coinciden con ningún
+           cliente registrado (compras sin cuenta de Google). -->
+      <div id="zonaSueltos"></div>
 
     </div>
 

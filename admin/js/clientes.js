@@ -1,6 +1,24 @@
 // ============================================================
-//  CLIENTES.JS - Clientes registrados
+//  CLIENTES.JS - Control por cliente
 //  Asociación Tecnológica Monterroso
+// ============================================================
+//
+//  Junta las dos colecciones del negocio:
+//    clientes → quién es (correo, teléfono, registro)
+//    ventas   → qué compró, cuándo y en qué estado
+//
+//  Cada pedido se pega a su cliente en este orden:
+//    1. uid      (la cuenta de Google con la que compró) ← el más seguro
+//    2. correo
+//    3. teléfono
+//    4. nombre
+//
+//  Los pedidos que no coinciden con ningún cliente registrado no se
+//  pierden: se muestran aparte, abajo, en "Pedidos sin cliente".
+//
+//  Solo se usan teléfono/nombre para emparejar cuando ese dato es
+//  único entre los clientes. Así nunca se le cuelga un pedido a la
+//  persona equivocada.
 // ============================================================
 
 import { db } from "../../firebase/firebase-config.js";
@@ -11,9 +29,119 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import { protegerPagina, conectarSalir } from "./sesion.js";
-import { aviso, escapar } from "../../js/comun.js";
+import { aviso, escapar, precio } from "../../js/comun.js";
 
 let clientes = [];
+let pedidos = [];
+let sueltos = [];
+
+// Clientes con el historial desplegado (por id)
+const abiertos = {};
+
+// ------------------------------------------------------------
+//  Normalizar
+// ------------------------------------------------------------
+
+function limpiar(t) {
+  return String(t == null ? "" : t).trim().toLowerCase();
+}
+
+function soloDigitos(t) {
+  return String(t == null ? "" : t).replace(/\D/g, "");
+}
+
+// ------------------------------------------------------------
+//  Fechas
+// ------------------------------------------------------------
+
+function aFecha(f) {
+
+  if (!f) return null;
+
+  try {
+    if (typeof f.toDate === "function") return f.toDate();
+    if (typeof f.seconds === "number") return new Date(f.seconds * 1000);
+
+    const d = new Date(f);
+    return isNaN(d.getTime()) ? null : d;
+  } catch (e) {
+    return null;
+  }
+}
+
+function numFecha(f) {
+  const d = aFecha(f);
+  return d ? d.getTime() : 0;
+}
+
+function fechaCorta(f) {
+
+  const d = aFecha(f);
+  if (!d) return "-";
+
+  return d.toLocaleDateString("es-GT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+}
+
+function fechaHora(f) {
+
+  const d = aFecha(f);
+  if (!d) return "-";
+
+  return d.toLocaleDateString("es-GT", { day: "2-digit", month: "2-digit" }) +
+    " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+// ------------------------------------------------------------
+//  Colores del estado del pedido
+// ------------------------------------------------------------
+
+function claseEstado(estado) {
+  if (estado === "Entregado") return "insignia-verde";
+  if (estado === "Trabajado") return "insignia-azul";
+  if (estado === "Cancelado") return "insignia-roja";
+  return "insignia-amarilla";
+}
+
+function esPorEntregar(v) {
+  const e = v.estado || "Pendiente";
+  return e === "Pendiente" || e === "Trabajado";
+}
+
+function noCancelado(v) {
+  return (v.estado || "Pendiente") !== "Cancelado";
+}
+
+// ------------------------------------------------------------
+//  Índice de un dato único
+//  Se salta los valores repetidos: si dos clientes tienen el mismo
+//  teléfono o el mismo nombre, ese dato no sirve para emparejar.
+// ------------------------------------------------------------
+
+function indiceUnico(lista, obtener, normalizar) {
+
+  const veces = new Map();
+  const indice = new Map();
+
+  lista.forEach((c) => {
+    const clave = normalizar(obtener(c));
+    if (!clave) return;
+    veces.set(clave, (veces.get(clave) || 0) + 1);
+  });
+
+  lista.forEach((c) => {
+    const clave = normalizar(obtener(c));
+    if (!clave || veces.get(clave) !== 1) return;
+    indice.set(clave, c);
+  });
+
+  return indice;
+}
+
+// ------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -24,44 +152,210 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const tabla = document.getElementById("tablaClientes");
   const buscador = document.getElementById("buscarCliente");
-  const totalEl = document.getElementById("totalClientes");
+  const zonaSueltos = document.getElementById("zonaSueltos");
 
   // ---------- Cargar ----------
 
   async function cargar() {
 
-    const datos = await getDocs(collection(db, "clientes"));
-    clientes = [];
+    // Las dos colecciones se piden a la vez, para no esperar dos veces.
+    const [datosClientes, datosVentas] = await Promise.all([
+      getDocs(collection(db, "clientes")),
+      getDocs(collection(db, "ventas"))
+    ]);
 
-    datos.forEach((documento) => {
+    clientes = [];
+    datosClientes.forEach((documento) => {
       const c = documento.data();
       c.id = documento.id;
+      c.pedidos = [];
       clientes.push(c);
     });
 
-    totalEl.textContent = clientes.length;
+    pedidos = [];
+    datosVentas.forEach((documento) => {
+      const v = documento.data();
+      v.id = documento.id;
+      pedidos.push(v);
+    });
+
+    emparejar();
+    ordenar();
+    resumen();
     filtrar();
   }
 
-  // ---------- Fecha ----------
+  // ---------- Pegar cada pedido a su cliente ----------
 
-  function obtenerFecha(fecha) {
+  function emparejar() {
 
-    if (!fecha) return "-";
+    const porUid = indiceUnico(clientes, (c) => c.id, limpiar);
+    const porCorreo = indiceUnico(clientes, (c) => c.correo, limpiar);
+    const porTelefono = indiceUnico(clientes, (c) => c.telefono, soloDigitos);
+    const porNombre = indiceUnico(clientes, (c) => c.nombre, limpiar);
 
-    try {
-      if (typeof fecha.toDate === "function") fecha = fecha.toDate();
-      const f = new Date(fecha);
-      if (isNaN(f.getTime())) return "-";
+    clientes.forEach((c) => { c.pedidos = []; });
+    sueltos = [];
 
-      return f.toLocaleDateString("es-GT", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-      });
-    } catch (e) {
-      return "-";
-    }
+    pedidos.forEach((v) => {
+
+      const tel = soloDigitos(v.telefono);
+
+      const cliente =
+        (v.uid && porUid.get(limpiar(v.uid))) ||
+        (v.correo && porCorreo.get(limpiar(v.correo))) ||
+        (tel.length >= 8 && porTelefono.get(tel)) ||
+        (v.cliente && porNombre.get(limpiar(v.cliente))) ||
+        null;
+
+      if (cliente) cliente.pedidos.push(v);
+      else sueltos.push(v);
+    });
+
+    // Datos calculados de cada cliente
+    clientes.forEach((c) => {
+
+      c.pedidos.sort((a, b) => numFecha(b.fecha) - numFecha(a.fecha));
+
+      c.numPedidos = c.pedidos.length;
+      c.numPorEntregar = c.pedidos.filter(esPorEntregar).length;
+      c.total = c.pedidos.filter(noCancelado)
+        .reduce((suma, v) => suma + (Number(v.total) || 0), 0);
+      c.ultima = c.numPedidos ? c.pedidos[0].fecha : null;
+    });
+
+    sueltos.sort((a, b) => numFecha(b.fecha) - numFecha(a.fecha));
+  }
+
+  // ---------- Orden: primero los que ya compraron ----------
+
+  function ordenar() {
+
+    clientes.sort((a, b) => {
+
+      if (a.numPedidos && !b.numPedidos) return -1;
+      if (!a.numPedidos && b.numPedidos) return 1;
+
+      if (a.numPedidos && b.numPedidos) {
+        return numFecha(b.ultima) - numFecha(a.ultima);
+      }
+
+      return limpiar(a.nombre).localeCompare(limpiar(b.nombre));
+    });
+  }
+
+  // ---------- Resumen de arriba ----------
+
+  function resumen() {
+
+    const porEntregar = pedidos.filter(esPorEntregar).length;
+
+    const totalPedido = pedidos.filter(noCancelado)
+      .reduce((suma, v) => suma + (Number(v.total) || 0), 0);
+
+    document.getElementById("totalClientes").textContent = clientes.length;
+    document.getElementById("totalConPedidos").textContent =
+      clientes.filter((c) => c.numPedidos > 0).length;
+    document.getElementById("totalPorEntregar").textContent = porEntregar;
+    document.getElementById("totalPedido").textContent = precio(totalPedido);
+  }
+
+  // ---------- Fila de un cliente ----------
+
+  function fila(c, i) {
+
+    const inicial = String(c.nombre || c.correo || "?")
+      .trim().charAt(0).toUpperCase() || "?";
+
+    const foto = c.foto
+      ? `<img src="${escapar(c.foto)}" alt="" loading="lazy" onerror="this.remove()">`
+      : "";
+
+    const etiquetaPedidos = c.numPedidos === 1 ? "pedido" : "pedidos";
+
+    return `
+      <tr>
+        <td class="mini">${i + 1}</td>
+        <td>
+          <div class="celda-cliente">
+            <div class="avatar"><span>${escapar(inicial)}</span>${foto}</div>
+            <strong>${escapar(c.nombre || "Sin nombre")}</strong>
+          </div>
+        </td>
+        <td>
+          ${escapar(c.correo || "-")}<br>
+          <span class="mini">${escapar(c.telefono || "sin teléfono")}</span>
+        </td>
+        <td>
+          ${c.numPedidos ? `<strong>${c.numPedidos}</strong>` : `<span class="mini">0</span>`}
+          ${c.numPorEntregar
+            ? `<br><span class="insignia insignia-amarilla">${c.numPorEntregar} por entregar</span>`
+            : ""}
+        </td>
+        <td>${c.numPedidos ? `<strong>${precio(c.total)}</strong>` : `<span class="mini">—</span>`}</td>
+        <td class="mini">${c.numPedidos ? fechaHora(c.ultima) : "nunca"}</td>
+        <td class="mini">${fechaCorta(c.fechaRegistro)}</td>
+        <td>
+          ${c.numPedidos
+            ? `<button class="btn-enlace" data-ver="${escapar(c.id)}">
+                 ${abiertos[c.id] ? "Ocultar" : `Ver ${c.numPedidos} ${etiquetaPedidos}`}
+               </button>`
+            : `<span class="mini">—</span>`}
+        </td>
+      </tr>
+      ${abiertos[c.id] ? detalle(c) : ""}`;
+  }
+
+  // ---------- Historial desplegado ----------
+
+  function detalle(c) {
+
+    const filas = c.pedidos.map((v) => {
+
+      const estado = v.estado || "Pendiente";
+
+      const lista = (v.productos || [])
+        .map((p) => escapar(p.nombre) + " x" + (p.cantidad || 1))
+        .join("<br>");
+
+      return `
+        <tr>
+          <td class="mini">${fechaHora(v.fecha)}</td>
+          <td>
+            ${lista || "-"}
+            ${v.notas ? `<br><span class="mini">✎ ${escapar(v.notas)}</span>` : ""}
+          </td>
+          <td>${precio(v.total)}</td>
+          <td><span class="insignia ${claseEstado(estado)}">${escapar(estado)}</span></td>
+        </tr>`;
+    }).join("");
+
+    return `
+      <tr class="fila-detalle">
+        <td colspan="8">
+          <div class="detalle-caja">
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Productos</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>${filas}</tbody>
+            </table>
+
+            <p class="mini" style="margin-top:12px">
+              Dirección: ${escapar(c.direccion || "no registrada")}.
+              El estado del pedido se cambia desde
+              <a href="ventas.html">Ventas</a>.
+            </p>
+
+          </div>
+        </td>
+      </tr>`;
   }
 
   // ---------- Mostrar ----------
@@ -70,46 +364,126 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!lista.length) {
       tabla.innerHTML =
-        `<tr><td colspan="5" class="mini">No hay clientes registrados</td></tr>`;
+        `<tr><td colspan="8" class="mini">No hay clientes que coincidan</td></tr>`;
       return;
     }
 
-    tabla.innerHTML = lista
-      .map((c, i) => `
+    tabla.innerHTML = lista.map(fila).join("");
+  }
+
+  // ---------- Pedidos sin cliente registrado ----------
+
+  function pintarSueltos(texto, digitos) {
+
+    if (!sueltos.length) {
+      zonaSueltos.innerHTML = "";
+      return;
+    }
+
+    const lista = !texto ? sueltos : sueltos.filter((v) =>
+      limpiar(v.cliente).includes(texto) ||
+      limpiar(v.telefono).includes(texto) ||
+      (digitos && soloDigitos(v.telefono).includes(digitos))
+    );
+
+    // Si se está buscando y nada coincide, no se muestra la sección.
+    if (!lista.length) {
+      zonaSueltos.innerHTML = "";
+      return;
+    }
+
+    const total = lista.filter(noCancelado)
+      .reduce((suma, v) => suma + (Number(v.total) || 0), 0);
+
+    const filas = lista.map((v) => {
+
+      const estado = v.estado || "Pendiente";
+
+      const productos = (v.productos || [])
+        .map((p) => escapar(p.nombre) + " x" + (p.cantidad || 1))
+        .join("<br>");
+
+      return `
         <tr>
-          <td>${i + 1}</td>
-          <td><strong>${escapar(c.nombre || "-")}</strong></td>
-          <td>${escapar(c.correo || "-")}</td>
-          <td>${escapar(c.telefono || "-")}</td>
-          <td class="mini">${obtenerFecha(c.fechaRegistro)}</td>
-        </tr>`)
-      .join("");
+          <td class="mini">${fechaHora(v.fecha)}</td>
+          <td>
+            <strong>${escapar(v.cliente || "-")}</strong>
+            ${v.correo ? `<br><span class="mini">${escapar(v.correo)}</span>` : ""}
+          </td>
+          <td class="mini">${escapar(v.telefono || "-")}</td>
+          <td>${productos || "-"}</td>
+          <td>${precio(v.total)}</td>
+          <td><span class="insignia ${claseEstado(estado)}">${escapar(estado)}</span></td>
+        </tr>`;
+    }).join("");
+
+    zonaSueltos.innerHTML = `
+      <h2 class="titulo-seccion">Pedidos sin cliente registrado (${lista.length})</h2>
+
+      <div class="tarjeta">
+
+        <p class="mini" style="margin-bottom:15px">
+          Pedidos de personas que compraron sin cuenta de Google, o con un
+          nombre o teléfono que no coincide con ningún cliente del listado.
+          No se pierden: siguen apareciendo en
+          <a href="ventas.html">Ventas</a>. Suma: <strong>${precio(total)}</strong>.
+        </p>
+
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Nombre en el pedido</th>
+                <th>Teléfono</th>
+                <th>Productos</th>
+                <th>Total</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+
+      </div>`;
   }
 
   // ---------- Buscar ----------
 
   function filtrar() {
 
-    const texto = buscador.value.toLowerCase().trim();
+    const texto = limpiar(buscador.value);
+    const digitos = soloDigitos(texto);
 
-    if (!texto) {
-      mostrar(clientes);
-      return;
-    }
+    const lista = !texto ? clientes.slice() : clientes.filter((c) =>
+      limpiar(c.nombre).includes(texto) ||
+      limpiar(c.correo).includes(texto) ||
+      limpiar(c.telefono).includes(texto) ||
+      (digitos && soloDigitos(c.telefono).includes(digitos))
+    );
 
-    const resultado = clientes.filter((c) => {
-      const nombre = String(c.nombre || "").toLowerCase();
-      const correo = String(c.correo || "").toLowerCase();
-      const telefono = String(c.telefono || "").toLowerCase();
-      return nombre.includes(texto) ||
-        correo.includes(texto) ||
-        telefono.includes(texto);
-    });
-
-    mostrar(resultado);
+    mostrar(lista);
+    pintarSueltos(texto, digitos);
   }
 
+  // ---------- Abrir / cerrar el historial ----------
+
+  tabla.addEventListener("click", (e) => {
+
+    const boton = e.target.closest("[data-ver]");
+    if (!boton) return;
+
+    const id = boton.dataset.ver;
+
+    if (abiertos[id]) delete abiertos[id];
+    else abiertos[id] = true;
+
+    filtrar();
+  });
+
   buscador.addEventListener("input", filtrar);
+
+  // ---------- Arrancar ----------
 
   try {
     await cargar();
@@ -117,7 +491,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error(error);
     aviso("No se pudieron cargar los clientes", "error");
     tabla.innerHTML =
-      `<tr><td colspan="5" class="mini">Error al cargar</td></tr>`;
+      `<tr><td colspan="8" class="mini">Error al cargar</td></tr>`;
   }
 
 });
