@@ -72,16 +72,26 @@
 
             <div class="campo">
               <label for="categoria">Categoría</label>
-              <select id="categoria">
-                <option>Robótica</option>
-                <option>Automatización e IoT</option>
-                <option>Desarrollo de Software</option>
-                <option>Videovigilancia</option>
-                <option>Inteligencia Artificial</option>
-                <option>Electrónica</option>
-                <option>Diseño 3D</option>
-                <option>Otros</option>
-              </select>
+              <div class="campo-fila">
+                <input type="text" id="categoria" list="sugerenciasCategorias"
+                       placeholder="Escribe una nueva o elige una de la lista…"
+                       autocomplete="off">
+                <button type="button" id="btnNuevaCategoria"
+                        class="btn btn-chico btn-gris"
+                        title="Crear una categoría nueva">＋ Nueva</button>
+              </div>
+              <datalist id="sugerenciasCategorias">
+                <option value="Robótica"></option>
+                <option value="Automatización e IoT"></option>
+                <option value="Desarrollo de Software"></option>
+                <option value="Videovigilancia"></option>
+                <option value="Inteligencia Artificial"></option>
+                <option value="Electrónica"></option>
+                <option value="Diseño 3D"></option>
+                <option value="Otros"></option>
+              </datalist>
+              <small class="mini">Puedes escribir una categoría que no exista;
+                se crea al guardar el producto.</small>
             </div>
 
             <div class="campo">
@@ -146,6 +156,46 @@
             </table>
           </div>
 
+        </div>
+
+      </div>
+
+      <!-- GESTOR DE CATEGORÍAS -->
+      <div class="tarjeta" id="gestorCategorias" style="margin-top:24px">
+
+        <h2 class="titulo-seccion" style="margin-top:0">Categorías</h2>
+
+        <p class="mini" style="margin:0 0 16px">
+          Una categoría existe mientras al menos un producto la use.
+          Al renombrarla se actualizan todos sus productos; al eliminarla,
+          sus productos pasan a la categoría que elijas.
+        </p>
+
+        <div class="campo">
+          <label for="nuevaCategoria">Nueva categoría</label>
+          <div class="campo-fila">
+            <input type="text" id="nuevaCategoria" autocomplete="off"
+                   placeholder="Ej: Impresión 3D">
+            <button type="button" id="btnAgregarCategoria"
+                    class="btn btn-chico">Agregar</button>
+          </div>
+          <small class="mini">Queda lista y puesta en el producto; se guarda
+            al guardar el producto.</small>
+        </div>
+
+        <div class="tabla-scroll tabla-categorias">
+          <table>
+            <thead>
+              <tr>
+                <th>Categoría</th>
+                <th>Productos</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaCategorias">
+              <tr><td colspan="3" class="mini">Cargando…</td></tr>
+            </tbody>
+          </table>
         </div>
 
       </div>

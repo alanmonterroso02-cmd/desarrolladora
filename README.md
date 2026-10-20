@@ -101,6 +101,11 @@ Entra por `admin/login.html` con el usuario que creaste en
 **Firebase Authentication > Users**. Desde ahí puedes:
 
 - Dar de alta productos con foto, categoría, precio, stock y descripción.
+- Crear categorías nuevas escribiéndolas con el teclado (el campo
+  **Categoría** no está limitado a una lista fija) y administrarlas desde
+  el gestor de **Categorías**: renombrar (actualiza todos sus productos) o
+  eliminar (sus productos pasan a la categoría que elijas). No hace falta
+  crear ninguna colección nueva en Firestore.
 - Ver el inventario y ajustar cantidades.
 - Ver y actualizar el estado de cada pedido. Los estados son:
   **Pendiente** (sin comenzar) → **Trabajado** (en proceso) →

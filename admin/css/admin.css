@@ -199,6 +199,48 @@ a {
   min-height: 80px;
 }
 
+/* Campo con un botón al lado (ej: categoría + "＋ Nueva") */
+
+.campo-fila {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.campo-fila input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Gestor de categorías: inputs y selects dentro de la tabla */
+
+.tabla-categorias input,
+.tabla-categorias select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  background: #0e1526;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.tabla-categorias input:focus,
+.tabla-categorias select:focus {
+  outline: none;
+  border-color: var(--azul);
+}
+
+.tabla-categorias td:last-child {
+  white-space: nowrap;
+}
+
+.tabla-categorias td .mini {
+  display: block;
+  margin-bottom: 4px;
+}
+
 .vista-imagen {
   width: 100%;
   margin-top: 12px;
@@ -250,6 +292,11 @@ a {
 
 .btn-rojo:hover {
   background: #b91c1c;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* ---------- Tablas ---------- */
