@@ -179,7 +179,18 @@ archivo: la sección "Paquetes y precios" del inicio se arma sola.
 El sitio se movió de Vercel a **Cloudflare Pages** porque el plan gratuito
 de Cloudflare sí permite uso comercial (Vercel Hobby es solo personal).
 
-### Opción A: conexión con GitHub (recomendada)
+### Estado actual
+
+- **Sitio publicado:** <https://asociacion-monterroso.pages.dev>
+- **Proyecto en Cloudflare:** `asociacion-monterroso`
+- **Cuenta:** asociacionmonterrosogt@gmail.com
+- **Rama de producción:** `main`
+
+La primera publicación ya se hizo desde esta computadora con Wrangler.
+Para subir cambios nuevos hay dos caminos: la Opción A (automática, hay
+que activarla una sola vez) o la Opción B (manual, ya funciona hoy).
+
+### Opción A: conexión con GitHub (recomendada, pendiente de activar)
 
 1. Entra a <https://dash.cloudflare.com> → **Workers & Pages** → **Create**
    → **Pages** → **Connect to Git**.
@@ -193,11 +204,16 @@ de Cloudflare sí permite uso comercial (Vercel Hobby es solo personal).
 
 ### Opción B: desde la computadora (Wrangler)
 
+El proyecto ya está creado, así que para publicar cambios basta con:
+
 ```bash
 npx wrangler login
-npx wrangler pages project create asociacion-monterroso
-npx wrangler pages deploy . --project-name=asociacion-monterroso
+npx wrangler pages deploy . --project-name=asociacion-monterroso --branch=main
 ```
+
+Nota: en la primera creación del proyecto hubo que usar `--force`, porque
+la versión nueva de Wrangler intenta delegar a Workers. Para publicar
+normalmente **no** se usa `--force`.
 
 ### Importante después de migrar
 
@@ -216,4 +232,15 @@ npx wrangler pages deploy . --project-name=asociacion-monterroso
 
 - `_headers`: cabeceras de seguridad y caché para Cloudflare Pages.
 - `wrangler.jsonc`: nombre del proyecto y carpeta publicada (la raíz).
+
+### Detalle de las URLs
+
+Cloudflare Pages quita el `.html` de las direcciones (URLs limpias):
+
+- `/pages/demo-catalogo.html` redirige a `/pages/demo-catalogo`
+- `/tienda/carrito.html` redirige a `/tienda/carrito`
+
+Los enlaces internos del sitio siguen usando `.html` y funcionan igual,
+porque la redirección es automática. Si compartes un enlace, es mejor
+usar la versión sin `.html`.
 
