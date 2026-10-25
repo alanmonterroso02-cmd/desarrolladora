@@ -27,7 +27,7 @@ const PRODUCTOS = [
     nombre: "Capuchino",
     categoria: "Cafés",
     precio: 28,
-    emoji: "☕",
+    emoji: "https://static.nationalgeographicla.com/files/styles/image_3200/public/cafe01.png.webp?w=1600&h=900",
     descripcion: "Espresso con leche vaporizada y espuma cremosa."
   },
   {
