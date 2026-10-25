@@ -171,3 +171,49 @@ archivo: la sección "Paquetes y precios" del inicio se arma sola.
   (reemplazar el recuadro "Video próximamente").
 - Revisar los textos genéricos del marcador y los tiempos de entrega de
   cada servicio.
+
+---
+
+## Despliegue en Cloudflare Pages
+
+El sitio se movió de Vercel a **Cloudflare Pages** porque el plan gratuito
+de Cloudflare sí permite uso comercial (Vercel Hobby es solo personal).
+
+### Opción A: conexión con GitHub (recomendada)
+
+1. Entra a <https://dash.cloudflare.com> → **Workers & Pages** → **Create**
+   → **Pages** → **Connect to Git**.
+2. Autoriza GitHub y elige el repositorio
+   `alanmonterroso02-cmd/desarrolladora`, rama `main`.
+3. Configura:
+   - **Framework preset:** None
+   - **Build command:** (vacío)
+   - **Build output directory:** `/`
+4. Guarda y despliega. Cada `git push` a `main` publica solo.
+
+### Opción B: desde la computadora (Wrangler)
+
+```bash
+npx wrangler login
+npx wrangler pages project create asociacion-monterroso
+npx wrangler pages deploy . --project-name=asociacion-monterroso
+```
+
+### Importante después de migrar
+
+1. **Firebase Authentication → Settings → Authorized domains:** agrega el
+   dominio nuevo (`asociacion-monterroso.pages.dev` y, si usas dominio
+   propio, ese también). Sin esto, el login con Google falla con
+   `auth/unauthorized-domain`.
+2. **Reglas de Firestore:** antes de vender de verdad, aplica las reglas
+   seguras de `GUIA_FIREBASE.md`.
+3. **Dominio propio:** en Cloudflare Pages → **Custom domains** → agrega
+   tu dominio y sigue el DNS que te indique.
+4. Cuando todo funcione, desconecta el proyecto de Vercel para no
+   mantener dos despliegues.
+
+### Archivos de configuración
+
+- `_headers`: cabeceras de seguridad y caché para Cloudflare Pages.
+- `wrangler.jsonc`: nombre del proyecto y carpeta publicada (la raíz).
+

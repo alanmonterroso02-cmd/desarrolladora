@@ -1,0 +1,29 @@
+# ============================================================
+#  _headers - Cabeceras para Cloudflare Pages
+#  Asociación Tecnológica Monterroso
+# ============================================================
+#  Cloudflare Pages lee este archivo automáticamente.
+#  No se agrega Content-Security-Policy a propósito: Firebase,
+#  Google Fonts, Unsplash y CallMeBot necesitan orígenes externos
+#  y una política mal configurada rompería el login y la tienda.
+# ============================================================
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# El HTML no se guarda en caché para que los cambios se vean al instante
+/*.html
+  Cache-Control: no-cache
+
+# Estilos y scripts: caché corta (1 hora)
+/css/*
+  Cache-Control: public, max-age=3600
+
+/js/*
+  Cache-Control: public, max-age=3600
+
+# Imágenes de productos: caché de una semana
+/pages/productos/imagenes/*
+  Cache-Control: public, max-age=604800

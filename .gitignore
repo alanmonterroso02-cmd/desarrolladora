@@ -1,0 +1,10 @@
+# Carpetas locales de herramientas de despliegue
+.wrangler/
+.vercel/
+
+# Dependencias (el proyecto no usa npm, pero por si acaso)
+node_modules/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
