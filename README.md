@@ -127,3 +127,47 @@ Con esas reglas activas, el descuento de stock desde el navegador deja
 de funcionar (no es seguro permitirlo), así que hay que borrar el bloque
 *"2. Descontar inventario"* de `js/checkout.js` y ajustar el stock desde
 el panel.
+
+---
+
+## Ampliaciones (2026)
+
+Se agregaron servicios, precios y una demo **sin cambiar** el estilo ni
+la estructura existente:
+
+```
+js/paquetes.js                  → ARCHIVO ÚNICO de precios (editar aquí)
+pages/servicios/
+  catalogo-whatsapp.html        → Catálogo con pedidos por WhatsApp
+  citas-reservas.html           → Sistema de citas y reservas
+  inventario-ventas.html        → Inventario y ventas
+  menu-qr.html                  → Menú digital con QR
+pages/demo-catalogo.html        → Catálogo de ejemplo (negocio ficticio)
+js/demo-catalogo.js             → Productos y lógica de la demo
+pages/productos/marcador-cancha.html
+                                → Marcador y temporizador inalámbrico
+```
+
+### Precios
+
+Todos los paquetes y sus valores están en **`js/paquetes.js`**. Para
+cambiar un precio, un texto o el orden de las tarjetas, edita solo ese
+archivo: la sección "Paquetes y precios" del inicio se arma sola.
+
+### Pedido por WhatsApp
+
+- En **`tienda/carrito.html`** hay un botón *"Enviar pedido por WhatsApp"*
+  que arma el mensaje con los productos, cantidades, subtotales y total.
+  El nombre del cliente es opcional.
+- En **`pages/demo-catalogo.html`** el pedido de ejemplo también se envía
+  por WhatsApp (lleva la nota de que es una demostración).
+- El **botón flotante de WhatsApp** aparece en todas las páginas públicas.
+
+### Pendiente de completar
+
+- Fotos reales para la demo y para el marcador (hoy son marcadores de
+  posición con emoji).
+- Video real del marcador en `pages/productos/marcador-cancha.html`
+  (reemplazar el recuadro "Video próximamente").
+- Revisar los textos genéricos del marcador y los tiempos de entrega de
+  cada servicio.

@@ -86,6 +86,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-height: 44px;
   background: var(--azul);
   color: #fff;
   text-decoration: none;
@@ -241,7 +242,10 @@ body {
 /* ---------- Botones ---------- */
 
 .btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   margin: 0;
   padding: 12px 26px;
   background: var(--azul);
@@ -831,4 +835,213 @@ body {
     justify-content: space-between;
     align-items: center;
   }
+
+  .demo-pedido {
+    scroll-margin-top: 130px;
+  }
+
+  .demo-linea {
+    flex-wrap: wrap;
+  }
+
+  .demo-linea-cantidad {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* ============================================================
+   AMPLIACIONES (2026)
+   Catálogo de demostración y pedido por WhatsApp.
+   ============================================================ */
+
+/* ---------- Pedido por WhatsApp (carrito real) ---------- */
+
+.wa-pedido {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  padding: 22px;
+  max-width: 620px;
+  margin: 0 auto 60px;
+}
+
+.wa-pedido h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.wa-pedido p {
+  color: var(--texto-suave);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.wa-pedido label {
+  display: block;
+  font-size: 14px;
+  color: var(--texto-suave);
+  margin-bottom: 7px;
+}
+
+.wa-pedido input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: #0e1526;
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  min-height: 44px;
+}
+
+.wa-pedido input:focus {
+  outline: none;
+  border-color: var(--azul);
+}
+
+.btn-wa {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 14px;
+  background: #25d366;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-wa:hover {
+  background: #1ebe5a;
+}
+
+.btn-wa:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Catálogo de demostración ---------- */
+
+.demo-aviso {
+  max-width: 720px;
+  margin: 0 auto 28px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(0, 191, 255, 0.08);
+  border: 1px solid rgba(0, 191, 255, 0.25);
+  color: var(--texto-suave);
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.filtro {
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 30px;
+  border: 1px solid var(--borde);
+  background: var(--tarjeta);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.filtro:hover {
+  border-color: var(--azul);
+  color: var(--azul);
+}
+
+.filtro.activo {
+  background: var(--azul);
+  border-color: var(--azul);
+  color: #fff;
+}
+
+.demo-pedido {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  padding: 22px;
+  max-width: 620px;
+  margin: 40px auto 60px;
+  scroll-margin-top: 90px;
+}
+
+.demo-pedido h2 {
+  font-size: 22px;
+  color: var(--azul);
+  margin-bottom: 14px;
+}
+
+.demo-linea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 14.5px;
+}
+
+.demo-linea-cantidad {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.demo-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 16px 0;
+}
+
+.demo-total strong {
+  color: var(--azul);
+}
+
+.demo-pedido .campo {
+  margin: 16px 0;
+}
+
+.demo-acciones-pedido {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.demo-acciones-pedido .btn-texto {
+  min-height: 44px;
+}
+
+.demo-vacio {
+  color: var(--texto-suave);
+  font-size: 14px;
+  padding: 10px 0;
+}
+
+/* Objetivos de toque cómodos en celular (mínimo 44 px) */
+
+.btn-chico {
+  min-height: 44px;
+}
+
+.btn-mini {
+  width: 44px;
+  height: 44px;
 }
