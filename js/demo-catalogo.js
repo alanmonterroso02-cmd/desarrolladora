@@ -27,7 +27,7 @@ const PRODUCTOS = [
     nombre: "Capuchino",
     categoria: "Cafés",
     precio: 28,
-    imagen: "https://images.unsplash.com/photo-1534788547277-4b92a7fb42c5?q=80&w=400&h=300&auto=format&fit=crop",
+    imagen: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Cappuccino_PeB.jpg/1280px-Cappuccino_PeB.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=thumbnail",
     descripcion: "Espresso con leche vaporizada y espuma cremosa."
   },
   {
