@@ -27,7 +27,7 @@ const PRODUCTOS = [
     nombre: "Capuchino",
     categoria: "Cafés",
     precio: 28,
-    emoji: "https://static.nationalgeographicla.com/files/styles/image_3200/public/cafe01.png.webp?w=1600&h=900",
+    imagen: "https://images.unsplash.com/photo-1534788547277-4b92a7fb42c5?q=80&w=400&h=300&auto=format&fit=crop",
     descripcion: "Espresso con leche vaporizada y espuma cremosa."
   },
   {
@@ -35,7 +35,7 @@ const PRODUCTOS = [
     nombre: "Latte de vainilla",
     categoria: "Cafés",
     precio: 32,
-    emoji: "🥛",
+    imagen: "https://images.unsplash.com/photo-1509041272908-705a5777580c?q=80&w=400&h=300&auto=format&fit=crop",
     descripcion: "Café suave con leche y un toque de vainilla."
   },
   {
@@ -43,7 +43,7 @@ const PRODUCTOS = [
     nombre: "Croissant de mantequilla",
     categoria: "Repostería",
     precio: 22,
-    emoji: "🥐",
+    imagen: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=400&h=300&auto=format&fit=crop",
     descripcion: "Horneado del día, crujiente por fuera y suave por dentro."
   },
   {
@@ -51,7 +51,7 @@ const PRODUCTOS = [
     nombre: "Pastel de zanahoria",
     categoria: "Repostería",
     precio: 25,
-    emoji: "🍰",
+    imagen: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=400&h=300&auto=format&fit=crop",
     descripcion: "Rebanada con betún de queso crema."
   },
   {
@@ -59,7 +59,7 @@ const PRODUCTOS = [
     nombre: "Sándwich de pollo",
     categoria: "Salados",
     precio: 35,
-    emoji: "🥪",
+    imagen: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=80&w=400&h=300&auto=format&fit=crop",
     descripcion: "Pan artesanal, pollo, lechuga, tomate y aderezo de la casa."
   },
   {
@@ -67,7 +67,7 @@ const PRODUCTOS = [
     nombre: "Empanada de carne",
     categoria: "Salados",
     precio: 18,
-    emoji: "🥟",
+    imagen: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=400&h=300&auto=format&fit=crop",
     descripcion: "Rellena de carne sazonada, recién horneada."
   }
 ];
@@ -152,7 +152,9 @@ function pintarProductos() {
   contenedor.innerHTML = visibles.map((p) => `
     <article class="producto">
       <div class="producto-imagen">
-        <div class="demo-foto" aria-hidden="true">${p.emoji}</div>
+        <div class="demo-foto" aria-hidden="true">
+          <img src="${p.imagen}" alt="${escapar(p.nombre)}" loading="lazy">
+        </div>
       </div>
       <div class="producto-cuerpo">
         <h3>${escapar(p.nombre)}</h3>

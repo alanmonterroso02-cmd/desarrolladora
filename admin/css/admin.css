@@ -656,3 +656,80 @@ table .avatar img {
     padding: 18px;
   }
 }
+
+/* ============================================================
+   BLOQUEO DEL PANEL MIENTRAS SE VERIFICA LA SESIÓN
+   Las páginas del panel nacen con <body class="protegido">.
+   Solo sesion.js quita esa clase cuando confirma la sesión.
+   ============================================================ */
+
+body.protegido {
+  overflow: hidden;
+}
+
+body.protegido .sidebar,
+body.protegido .principal {
+  visibility: hidden;
+}
+
+/* La capa está oculta salvo cuando la página sigue bloqueada */
+.verificando {
+  display: none;
+}
+
+body.protegido .verificando {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--fondo);
+  text-align: center;
+}
+
+.verificando-caja {
+  max-width: 320px;
+}
+
+.verificando-spinner {
+  display: block;
+  width: 38px;
+  height: 38px;
+  margin: 0 auto 16px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--azul);
+  border-radius: 50%;
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.verificando-caja p {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.verificando-caja small {
+  display: block;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--texto-suave);
+}
+
+.verificando-caja small a {
+  color: var(--azul);
+}
+
+/* Si el sistema pide menos movimiento, no giramos el círculo */
+@media (prefers-reduced-motion: reduce) {
+  .verificando-spinner {
+    animation: none;
+  }
+}

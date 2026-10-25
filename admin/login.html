@@ -85,7 +85,11 @@
 
       try {
         await signInWithEmailAndPassword(auth, usuario, password);
-        window.location.href = "dashboard.html";
+
+        // Volver a la página de admin que se estaba intentando abrir
+        const params = new URLSearchParams(window.location.search);
+        const volver = params.get("volver") || "dashboard.html";
+        window.location.href = volver;
       } catch (error) {
         console.error("Error de inicio de sesión:", error);
         alert("Correo o contraseña incorrectos.");

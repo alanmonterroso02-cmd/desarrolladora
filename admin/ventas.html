@@ -16,7 +16,16 @@
 
 </head>
 
-<body>
+<body class="protegido">
+
+  <!-- Mientras se verifica la sesión no se muestra nada del panel -->
+  <div id="verificandoSesion" class="verificando">
+    <div class="verificando-caja">
+      <span class="verificando-spinner" aria-hidden="true"></span>
+      <p>Verificando sesión…</p>
+      <small>Si tarda demasiado, <a href="login.html">entra al login</a>.</small>
+    </div>
+  </div>
 
   <!-- BARRA LATERAL -->
   <aside class="sidebar">
