@@ -1,7 +1,0 @@
-{
-  // Configuración para Cloudflare Pages.
-  // El sitio es estático: no hay comando de compilación y la
-  // carpeta que se publica es la raíz del proyecto.
-  "name": "asociacion-monterroso",
-  "pages_build_output_dir": "."
-}
