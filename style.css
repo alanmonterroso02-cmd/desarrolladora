@@ -444,7 +444,8 @@ footer{
 
 .demo-foto{
   width:100%;
-  height:100%;
+  aspect-ratio: 4 / 3;
+  max-height: 260px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -458,6 +459,13 @@ footer{
   height:100%;
   object-fit:cover;
   display:block;
+}
+
+/* En pantallas grandes las tarjetas se ensanchan; limitamos la altura de la imagen */
+@media(min-width: 1024px){
+  .demo-foto{
+    max-height: 220px;
+  }
 }
 
 .demo-acciones{
