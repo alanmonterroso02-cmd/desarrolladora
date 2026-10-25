@@ -35,7 +35,7 @@ const PRODUCTOS = [
     nombre: "Latte de vainilla",
     categoria: "Cafés",
     precio: 32,
-    imagen: "https://images.unsplash.com/photo-1509041272908-705a5777580c?q=80&w=400&h=300&auto=format&fit=crop",
+    imagen: "https://img.magnific.com/foto-gratis/latte-arce-canela-taza-vidrio_123827-36226.jpg?semt=ais_hybrid&w=740&q=80",
     descripcion: "Café suave con leche y un toque de vainilla."
   },
   {
