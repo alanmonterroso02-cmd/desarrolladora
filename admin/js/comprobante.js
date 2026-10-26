@@ -22,7 +22,7 @@ import { listaPiezas, piezaConDatos } from "../../js/personalizacion.js";
 
 const NEGOCIO = {
   nombre: "Asociación Tecnológica Monterroso",
-  contacto: "WhatsApp: +502 4897-5506   ·   alanmonterroso02@gmail.com   ·   Guatemala"
+  contacto: "WhatsApp: +502 4897-5506   ·   asociacionmonterrosogt@gmail.com   ·   Guatemala"
 };
 
 const RUTA_JSPDF =

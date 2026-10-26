@@ -25,6 +25,8 @@ import {
 // ------------------------------------------------------------
 
 const CORREOS_ADMIN = [
+  "asociacionmonterrosogt@gmail.com",
+  // Se deja el correo anterior para no perder el acceso al panel.
   "alanmonterroso02@gmail.com"
 ];
 

@@ -129,7 +129,7 @@ Objetivo de las reglas:
 - Que **cada cliente** solo pueda leer y escribir sus propios datos.
 
 Estas reglas ya traen puesto el correo del administrador
-(`alanmonterroso02@gmail.com`); cámbialo ahí si usas otro. Pégalas en
+(`asociacionmonterrosogt@gmail.com`); cámbialo ahí si usas otro. Pégalas en
 **Firestore Database > Reglas > Publicar**:
 
 ```
@@ -140,7 +140,10 @@ service cloud.firestore {
 
     function esAdmin() {
       return request.auth != null
-             && request.auth.token.email == "alanmonterroso02@gmail.com";
+             && request.auth.token.email in [
+                  "asociacionmonterrosogt@gmail.com",
+                  "alanmonterroso02@gmail.com"
+                ];
     }
 
     // Productos: todos leen, solo el admin escribe
