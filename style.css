@@ -548,3 +548,14 @@ footer{
     scroll-margin-top:130px;
   }
 }
+
+/* ---------- Grupos de servicios ---------- */
+
+.grupo-subtitulo{
+  grid-column: 1 / -1;
+  font-size: 20px;
+  color:#00bfff;
+  margin: 30px 0 15px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  padding-bottom:8px;
+}
