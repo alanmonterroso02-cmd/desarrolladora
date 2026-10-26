@@ -622,3 +622,28 @@ section[id]{
     scroll-margin-top:150px;
   }
 }
+
+/* ---------- Contacto: teléfono y correo tocables ---------- */
+
+.contact p a{
+  color:#00bfff;
+  text-decoration:none;
+}
+
+.contact p a:hover{
+  text-decoration:underline;
+}
+
+/* ---------- Botones finales de servicios y productos ---------- */
+
+.acciones{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:12px;
+  margin-top:30px;
+}
+
+.acciones .btn{
+  margin:0;
+}
