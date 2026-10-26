@@ -152,7 +152,18 @@ function dibujarPaquetes() {
   const contenedor = document.getElementById("listaPaquetes");
   if (!contenedor) return;
 
-  contenedor.innerHTML = PAQUETES.map(tarjeta).join("");
+  try {
+    // Generamos primero el HTML. Si algo falla aquí, el respaldo sigue visible.
+    const html = PAQUETES.map(tarjeta).join("");
+
+    // Vaciamos el mensaje de respaldo justo antes de pintar las tarjetas.
+    contenedor.replaceChildren();
+    contenedor.innerHTML = html;
+  } catch (error) {
+    // Si hay un error, dejamos el mensaje de respaldo para que el cliente
+    // pueda escribir por WhatsApp en lugar de ver la sección vacía.
+    console.error("No se pudieron cargar los paquetes:", error);
+  }
 }
 
 if (document.readyState === "loading") {

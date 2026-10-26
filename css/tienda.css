@@ -88,7 +88,7 @@ body {
   gap: 8px;
   min-height: 44px;
   background: var(--azul);
-  color: #fff;
+  color: #0b0f1a; /* texto oscuro: mejor contraste sobre el azul */
   text-decoration: none;
   padding: 9px 16px;
   border-radius: 30px;
@@ -249,7 +249,7 @@ body {
   margin: 0;
   padding: 12px 26px;
   background: var(--azul);
-  color: #fff;
+  color: #0b0f1a; /* texto oscuro: mejor contraste sobre el azul */
   border: none;
   border-radius: 10px;
   font-family: inherit;
@@ -967,7 +967,7 @@ body {
 .filtro.activo {
   background: var(--azul);
   border-color: var(--azul);
-  color: #fff;
+  color: #0b0f1a; /* texto oscuro: mejor contraste sobre el azul */
 }
 
 .demo-pedido {

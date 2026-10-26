@@ -103,7 +103,7 @@ nav ul li a:hover{
   margin-top:30px;
   padding:15px 35px;
   background:#00bfff;
-  color:white;
+  color:#0b0f1a; /* texto oscuro: mejor contraste sobre el azul */
   text-decoration:none;
   border-radius:12px;
   transition:0.3s;
@@ -113,6 +113,7 @@ nav ul li a:hover{
 .btn:hover{
   transform:scale(1.05);
   background:#0099cc;
+  color:#0b0f1a;
 }
 
 /* SECTION */
@@ -438,6 +439,11 @@ footer{
 .paquete .btn{
   margin-top:auto;
   text-align:center;
+  color:#0b0f1a;
+}
+
+.contact .btn{
+  color:#0b0f1a;
 }
 
 /* ---------- Página de demostración de catálogo ---------- */
@@ -603,4 +609,16 @@ footer{
   margin-top:14px;
   font-size:0.45em;
   font-weight:500;
+}
+
+/* ---------- Anclas: que el menú fijo no tape el inicio de cada sección ---------- */
+
+section[id]{
+  scroll-margin-top:100px;
+}
+
+@media(max-width:768px){
+  section[id]{
+    scroll-margin-top:150px;
+  }
 }
