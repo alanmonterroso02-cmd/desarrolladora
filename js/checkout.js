@@ -9,9 +9,6 @@ import { auth } from "../firebase/firebase-auth.js";
 import {
   collection,
   addDoc,
-  doc,
-  updateDoc,
-  increment,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -388,22 +385,7 @@ formulario.addEventListener("submit", async (e) => {
       console.error("No se pudieron guardar los datos del cliente:", err);
     }
 
-    // 2. Descontar inventario de forma atómica. Esto es solo para el
-    //    panel del administrador; al cliente no le afecta en nada.
-    //    ⚠️ Si cierras las reglas de Firestore (recomendado, ver
-    //    GUIA_FIREBASE.md), borra este bloque: el stock se ajusta
-    //    desde el panel de administración.
-    for (const item of productosCompra) {
-      try {
-        await updateDoc(doc(db, "productos", item.id), {
-          stock: increment(-item.cantidad)
-        });
-      } catch (err) {
-        console.error("No se pudo actualizar el stock de " + item.id, err);
-      }
-    }
-
-    // 3. Avisar por WhatsApp (no bloquea la compra)
+    // 2. Avisar por WhatsApp (no bloquea la compra)
     //    Se detalla lo que el cliente pidió personalizar (y se avisa
     //    si algún personalizado quedó sin detalles).
     const lista = productosCompra.map((p) => {
@@ -428,7 +410,7 @@ formulario.addEventListener("submit", async (e) => {
       `Total: ${precio(total)}`
     );
 
-    // 4. Limpiar carrito y avisar al cliente
+    // 3. Limpiar carrito y avisar al cliente
     vaciar();
     aviso("¡Pedido enviado! Te contactaremos pronto.");
 

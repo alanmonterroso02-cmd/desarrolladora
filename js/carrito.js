@@ -49,7 +49,11 @@ export function agregarAlCarrito(id, nombre = "Producto") {
     carrito.push({ id: id, cantidad: 1 });
   }
 
-  guardar(carrito);
+  if (!guardar(carrito)) {
+    aviso("No se pudo guardar en el carrito. Libera espacio e intenta de nuevo.", "error");
+    return;
+  }
+
   aviso(nombre + " agregado al carrito");
 }
 
@@ -90,7 +94,10 @@ export function sumar(id) {
   if (!producto) return;
   producto.cantidad++;
   ajustarPiezas(producto);
-  guardar(carrito);
+
+  if (!guardar(carrito)) {
+    aviso("No se pudo guardar en el carrito. Libera espacio e intenta de nuevo.", "error");
+  }
 }
 
 export function restar(id) {
@@ -105,16 +112,26 @@ export function restar(id) {
     carrito = carrito.filter((p) => p.id !== id);
   }
 
-  guardar(carrito);
+  if (!guardar(carrito)) {
+    aviso("No se pudo guardar en el carrito. Libera espacio e intenta de nuevo.", "error");
+  }
 }
 
 export function eliminar(id) {
   const carrito = obtenerCarrito().filter((p) => p.id !== id);
-  guardar(carrito);
+
+  if (!guardar(carrito)) {
+    aviso("No se pudo guardar en el carrito. Libera espacio e intenta de nuevo.", "error");
+  }
 }
 
 export function vaciar() {
-  localStorage.removeItem(CLAVE);
+  try {
+    localStorage.removeItem(CLAVE);
+  } catch (e) {
+    // Sin acceso a localStorage: igual refrescamos el contador.
+  }
+
   actualizarContadorCarrito();
 }
 
