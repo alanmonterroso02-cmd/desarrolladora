@@ -34,9 +34,8 @@ js/
   productos.js                 → Acceso a productos + caché local
   carrito.js                   → Carrito (localStorage, funciona sin internet)
   ver_carrito.js               → Lógica de la página "Mi carrito"
-  checkout.js                  → Guarda el pedido, descuenta stock y avisa por WhatsApp
+  checkout.js                  → Guarda el pedido en el panel y arma el WhatsApp
   auth-cliente.js              → Login con Google (opcional)
-  notificar-whatsapp.js        → Aviso de pedidos por WhatsApp (CallMeBot)
   comun.js                     → Avisos (toast), precios, utilidades
 
 firebase/
@@ -64,10 +63,7 @@ GUIA_FIREBASE.md               → Paso a paso para conectar Firebase
 2. Aplica las **reglas seguras** de Firestore (sección *Seguridad* de
    la guía). Es lo más urgente: con reglas abiertas, cualquiera puede
    leer y borrar tus datos.
-3. Avisos automáticos por WhatsApp: revisa
-   `js/notificar-whatsapp.js` (y ten en cuenta que la clave queda
-   visible para los visitantes).
-4. Sube tus productos desde `admin/login.html`.
+3. Sube tus productos desde `admin/login.html`.
 
 ---
 
@@ -79,8 +75,11 @@ GUIA_FIREBASE.md               → Paso a paso para conectar Firebase
    el botón *Confirmar pedido* queda bloqueado. Sus datos de contacto se
    rellenan solos y el pedido queda asociado a su correo.
 4. Al confirmar: se vuelven a leer los **precios y el stock reales**
-   desde Firestore (no se confía en la caché del celular), se guarda el
-   pedido y llega un WhatsApp al administrador (si está configurado).
+   desde Firestore (no se confía en la caché del celular) y el pedido
+   queda guardado en el panel de administración. En la pantalla de
+   agradecimiento el cliente puede **enviar su pedido por WhatsApp**
+   desde su propio celular con un botón, para agilizar la confirmación.
+   No se envía ningún aviso automático ni se descuenta stock.
 
 ### Rendimiento en conexiones lentas
 
@@ -156,6 +155,11 @@ archivo: la sección "Paquetes y precios" del inicio se arma sola.
 
 ### Pedido por WhatsApp
 
+- Al terminar el pedido en **`tienda/checkout.html`**, la pantalla de
+  agradecimiento muestra el botón *"Enviar mi pedido por WhatsApp"*: el
+  mensaje (nombre, teléfono, dirección, productos, notas y total) sale
+  desde el celular del cliente hacia el WhatsApp del negocio. Antes de
+  eso, el pedido ya quedó guardado en el panel de administración.
 - En **`tienda/carrito.html`** hay un botón *"Enviar pedido por WhatsApp"*
   que arma el mensaje con los productos, cantidades, subtotales y total.
   El nombre del cliente es opcional.

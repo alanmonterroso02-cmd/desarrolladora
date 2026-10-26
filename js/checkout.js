@@ -19,7 +19,6 @@ import {
 
 import { obtenerCarrito, vaciar } from "./carrito.js";
 import { mapaProductos, mapaProductosFrescos } from "./productos.js";
-import { avisarAdmin } from "./notificar-whatsapp.js";
 import { precio, aviso, escapar } from "./comun.js";
 import {
   listaPiezas,
@@ -27,6 +26,9 @@ import {
   resumenPersonalizacion
 } from "./personalizacion.js";
 import { iniciarSesionCliente, completarLoginRedirect, guardarDatosCliente, obtenerDatosCliente } from "./auth-cliente.js";
+
+// WhatsApp del negocio: lo usa el cliente para enviarnos su pedido.
+const WHATSAPP_NEGOCIO = "50248975506";
 
 const formulario = document.getElementById("formCompra");
 const totalEl = document.getElementById("totalCompra");
@@ -385,7 +387,7 @@ formulario.addEventListener("submit", async (e) => {
       console.error("No se pudieron guardar los datos del cliente:", err);
     }
 
-    // 2. Avisar por WhatsApp (no bloquea la compra)
+    // 2. Armar el mensaje para que el cliente lo envíe por WhatsApp
     //    Se detalla lo que el cliente pidió personalizar (y se avisa
     //    si algún personalizado quedó sin detalles).
     const lista = productosCompra.map((p) => {
@@ -399,16 +401,14 @@ formulario.addEventListener("submit", async (e) => {
       return texto;
     }).join("\n");
 
-    avisarAdmin(
-      "🛒 Nuevo pedido\n" +
-      `Cliente: ${nombre}\n` +
-      `Cuenta Google: ${usuario.email || "-"}\n` +
+    const mensajeWA =
+      "Hola, acabo de hacer un pedido en la tienda:\n" +
+      `Nombre: ${nombre}\n` +
       `Tel: ${telefono}\n` +
       `Dirección: ${direccion}\n` +
       `Productos:\n${lista}\n` +
       `Notas: ${notas || "Ninguna"}\n` +
-      `Total: ${precio(total)}`
-    );
+      `Total: ${precio(total)}`;
 
     // 3. Limpiar carrito y avisar al cliente
     vaciar();
@@ -417,8 +417,12 @@ formulario.addEventListener("submit", async (e) => {
     document.getElementById("zonaCheckout").innerHTML = `
       <div class="aviso-vacio">
         <h2>¡Gracias por tu pedido!</h2>
-        <p>Recibimos tu solicitud. Nos pondremos en contacto contigo
-        por WhatsApp para confirmar.</p>
+        <p>Recibimos tu solicitud. Para agilizar la confirmación, envíanos tu pedido por WhatsApp.</p>
+        <a class="btn btn-wa"
+           href="https://wa.me/${WHATSAPP_NEGOCIO}?text=${encodeURIComponent(mensajeWA)}"
+           target="_blank" rel="noopener">
+          Enviar mi pedido por WhatsApp
+        </a>
         <a href="../pages/tienda.html" class="btn">Seguir comprando</a>
       </div>`;
 

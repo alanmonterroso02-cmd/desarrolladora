@@ -94,23 +94,20 @@ No hay que crearlas a mano. El sitio usa:
    - Se creó el pedido en Firestore (`ventas`).
    - El stock del producto bajó (solo mientras las reglas sigan
      abiertas; con las reglas seguras el stock se ajusta desde el panel).
-   - Te llegó el aviso de WhatsApp (si configuraste
-     `js/notificar-whatsapp.js` con una clave válida).
+   - En la pantalla de agradecimiento aparece el botón
+     *"Enviar mi pedido por WhatsApp"*, que abre WhatsApp con el
+     resumen del pedido para que el cliente lo envíe desde su celular.
 
-## 7. Avisos por WhatsApp (opcional)
+## 7. Pedidos por WhatsApp
 
-> ⚠️ Esta función envía la clave desde el navegador, así que **cualquiera
-> puede verla**. Úsala solo si te parece aceptable ese riesgo.
+El pedido se guarda en la colección `ventas` y se ve en el panel
+(`admin/ventas.html`). Además, al terminar el checkout, el cliente
+encuentra el botón **"Enviar mi pedido por WhatsApp"**: el mensaje
+(nombre, teléfono, dirección, productos, notas y total) se abre en su
+propio WhatsApp listo para enviarlo al número del negocio.
 
-Para recibir un WhatsApp automático con cada pedido:
-
-1. Agrega el número **+34 644 51 95 23** a tus contactos.
-2. Envíale el mensaje exacto:
-   `I allow callmebot to send me messages`
-3. Recibirás tu **APIKEY** por WhatsApp.
-4. Pégala en **`js/notificar-whatsapp.js`**, en `DESTINATARIOS`.
-   Si la dejas vacía (`apikey: ""`), el aviso queda desactivado y no se
-   envía nada; los pedidos igual aparecen en el panel.
+No hay avisos automáticos ni claves de terceros: el envío lo hace el
+cliente desde su celular, así que no se expone ninguna clave en el sitio.
 
 ## 8. Publicar el sitio (gratis)
 
@@ -184,10 +181,6 @@ El pedido se sigue guardando y el panel lo muestra igual.
 
 ### Otros pendientes de seguridad
 
-- La clave de CallMeBot (`js/notificar-whatsapp.js`) se envía desde el
-  navegador, así que **cualquiera puede verla**. Si estuvo publicada en
-  el repositorio, considérala comprometida: genera una nueva o deja el
-  aviso desactivado (los pedidos llegan igual al panel).
 - La configuración de Firebase (`apiKey`, etc.) **no es secreta**: lo
   que protege los datos son las reglas de arriba, no ocultar esos IDs.
 

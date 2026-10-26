@@ -4,7 +4,7 @@
 # ============================================================
 #  Cloudflare Pages lee este archivo automáticamente.
 #  No se agrega Content-Security-Policy a propósito: Firebase,
-#  Google Fonts, Unsplash y CallMeBot necesitan orígenes externos
+#  Google Fonts, Unsplash y WhatsApp necesitan orígenes externos
 #  y una política mal configurada rompería el login y la tienda.
 # ============================================================
 
