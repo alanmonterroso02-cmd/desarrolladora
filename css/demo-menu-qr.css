@@ -1,0 +1,418 @@
+/* ============================================================
+   DEMO-MENU-QR.CSS - Menú digital con QR (demostración)
+   Asociación Tecnológica Monterroso
+   Estilos propios de la demo: pizarra verde, tiza y maíz.
+   ============================================================ */
+
+:root {
+  --pizarra: #17302b;
+  --pizarra-2: #1f3d37;
+  --tiza: #f2efe6;
+  --tiza-suave: #c9d3cc;
+  --maiz: #f2b632;
+  --chile: #e5603f;
+  --linea: rgba(242, 239, 230, .28);
+  --display: "Bevan", Georgia, "Times New Roman", serif;
+  --texto: "Karla", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 76px;
+}
+
+body {
+  margin: 0;
+  background: var(--pizarra);
+  color: var(--tiza);
+  font-family: var(--texto);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--maiz);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------- Barra superior del sitio ---------- */
+
+.barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  font-size: 15px;
+  background: #10231f;
+  border-bottom: 1px solid var(--linea);
+}
+
+.barra a {
+  text-decoration: none;
+  color: var(--tiza-suave);
+}
+
+.barra a:hover { color: var(--maiz); }
+
+.barra strong {
+  color: var(--tiza);
+  font-weight: 700;
+}
+
+.contenedor {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ---------- Portada del negocio ---------- */
+
+.portada { padding: 40px 0 8px; }
+
+.portada h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 9vw, 4rem);
+  line-height: 1.02;
+  margin: 0 0 10px;
+  color: var(--maiz);
+  letter-spacing: .5px;
+}
+
+.portada .horario {
+  margin: 0;
+  color: var(--tiza-suave);
+}
+
+.aviso {
+  margin: 24px 0 0;
+  padding: 14px 16px;
+  border-left: 4px solid var(--maiz);
+  background: var(--pizarra-2);
+  font-size: 15px;
+  color: var(--tiza-suave);
+}
+
+.aviso strong { color: var(--tiza); }
+
+/* ---------- Modo dueño ---------- */
+
+.dueno {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0 0;
+}
+
+.dueno p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--tiza-suave);
+  max-width: 38ch;
+}
+
+.btn {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  padding: 11px 18px;
+  border-radius: 999px;
+  border: 2px solid var(--maiz);
+  background: transparent;
+  color: var(--maiz);
+}
+
+.btn:hover { background: rgba(242, 182, 50, .14); }
+
+.btn[aria-pressed="true"] {
+  background: var(--maiz);
+  color: var(--pizarra);
+}
+
+.btn-principal {
+  background: var(--maiz);
+  color: var(--pizarra);
+  border-color: var(--maiz);
+}
+
+.btn-principal:hover { background: #ffc94d; }
+
+/* ---------- Navegación de categorías ---------- */
+
+.categorias {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin-top: 28px;
+  background: var(--pizarra);
+  border-bottom: 1px solid var(--linea);
+}
+
+.categorias ul {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 12px 20px;
+  overflow-x: auto;
+  max-width: 720px;
+  margin-inline: auto;
+  scrollbar-width: none;
+}
+
+.categorias ul::-webkit-scrollbar { display: none; }
+
+.categorias a {
+  display: block;
+  white-space: nowrap;
+  text-decoration: none;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 15px;
+  border: 1px solid var(--linea);
+  color: var(--tiza);
+}
+
+.categorias a:hover,
+.categorias a.activa {
+  background: var(--tiza);
+  color: var(--pizarra);
+  border-color: var(--tiza);
+}
+
+/* ---------- Secciones del menú ---------- */
+
+.seccion { padding: 34px 0 6px; }
+
+.seccion h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.9rem;
+  margin: 0 0 4px;
+  color: var(--tiza);
+}
+
+.seccion .nota {
+  margin: 0 0 14px;
+  color: var(--tiza-suave);
+  font-size: 15px;
+}
+
+.plato {
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--linea);
+}
+
+.plato:last-child { border-bottom: 0; }
+
+.fila {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.nombre {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.puntos {
+  flex: 1;
+  border-bottom: 2px dotted var(--linea);
+  transform: translateY(-4px);
+  min-width: 16px;
+}
+
+.precio {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--maiz);
+  white-space: nowrap;
+}
+
+.desc {
+  margin: 2px 0 0;
+  color: var(--tiza-suave);
+  font-size: 15px;
+  max-width: 52ch;
+}
+
+.etiquetas {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.tag {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--maiz);
+  color: var(--pizarra);
+}
+
+.tag.veg { background: #9fd3a7; }
+.tag.agotado { background: var(--chile); color: #fff; }
+
+.plato.no-hay .nombre,
+.plato.no-hay .precio,
+.plato.no-hay .desc { opacity: .5; }
+
+.plato.no-hay .nombre,
+.plato.no-hay .precio { text-decoration: line-through; }
+
+/* ---------- Interruptor del dueño ---------- */
+
+.interruptor {
+  display: none;
+  margin-left: auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--tiza-suave);
+  cursor: pointer;
+}
+
+body.modo-dueno .interruptor { display: inline-flex; }
+
+.interruptor input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.interruptor .riel {
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: #4b5d57;
+  position: relative;
+  transition: background .15s;
+}
+
+.interruptor .riel::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--tiza);
+  transition: transform .15s;
+}
+
+.interruptor input:checked + .riel { background: var(--maiz); }
+
+.interruptor input:checked + .riel::after {
+  transform: translateX(18px);
+  background: var(--pizarra);
+}
+
+.interruptor input:focus-visible + .riel {
+  outline: 3px solid var(--maiz);
+  outline-offset: 3px;
+}
+
+/* ---------- Código QR ---------- */
+
+.qr {
+  margin: 44px 0 0;
+  padding: 28px 22px;
+  background: var(--tiza);
+  color: var(--pizarra);
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.qr h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.6rem;
+  margin: 0 0 6px;
+}
+
+.qr p {
+  margin: 0;
+  font-size: 16px;
+}
+
+#codigo-qr {
+  background: var(--tiza);
+  padding: 4px;
+  line-height: 0;
+  min-width: 176px;
+  min-height: 176px;
+}
+
+#codigo-qr img,
+#codigo-qr canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------- Llamado final ---------- */
+
+.contacto {
+  padding: 40px 0 48px;
+  text-align: left;
+}
+
+.contacto h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.8rem;
+  margin: 0 0 8px;
+  color: var(--maiz);
+}
+
+.contacto p {
+  margin: 0 0 18px;
+  color: var(--tiza-suave);
+  max-width: 46ch;
+}
+
+footer {
+  padding: 18px 20px 28px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--tiza-suave);
+  border-top: 1px solid var(--linea);
+}
+
+/* ---------- Pantallas pequeñas ---------- */
+
+@media (max-width: 520px) {
+  body { font-size: 16px; }
+
+  .qr {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  .interruptor .riel,
+  .interruptor .riel::after { transition: none; }
+}

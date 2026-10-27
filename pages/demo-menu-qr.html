@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Demostración de menú digital con código QR: platos, precios y disponibilidad que se actualizan al instante.">
+
+  <title>Menú QR de ejemplo | Asociación Tecnológica Monterroso</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bevan&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/demo-menu-qr.css">
+
+</head>
+
+<body>
+
+  <!-- BARRA SUPERIOR -->
+
+  <div class="barra">
+    <a href="../index.html"><strong>Comedor Doña Chela</strong> &nbsp;Menú de demostración</a>
+    <a href="../index.html">Volver al sitio</a>
+  </div>
+
+  <!-- PORTADA -->
+
+  <header class="contenedor portada">
+    <h1>Comedor Doña Chela</h1>
+    <p class="horario">Cocina chapina todos los días. Abierto de 7:00 a 20:00.</p>
+
+    <p class="aviso">
+      <strong>Menú de ejemplo.</strong> Así se vería el menú de tu negocio en el celular de tus clientes: lo abren escaneando un código QR en la mesa. Los platos, precios y fotos son de ejemplo y se cambian por los tuyos.
+    </p>
+
+    <div class="dueno">
+      <p>Prueba cómo lo cambia el dueño: marca un plato como agotado y el cliente lo ve al instante.</p>
+      <button class="btn" id="btn-dueno" type="button" aria-pressed="false">Probar como dueño</button>
+    </div>
+  </header>
+
+  <!-- CATEGORÍAS -->
+
+  <nav class="categorias" aria-label="Categorías del menú">
+    <ul id="nav-categorias"></ul>
+  </nav>
+
+  <!-- MENÚ (se genera desde js/demo-menu-qr.js) -->
+
+  <main class="contenedor" id="menu"></main>
+
+  <!-- CÓDIGO QR -->
+
+  <section class="contenedor" aria-labelledby="titulo-qr">
+    <div class="qr">
+      <div id="codigo-qr" role="img" aria-label="Código QR que abre este menú"></div>
+      <div>
+        <h2 id="titulo-qr">Escanea y abre el menú</h2>
+        <p>Apunta la cámara de tu celular a este código. Se imprime una vez y se pega en cada mesa, en la puerta o en tus redes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+
+  <section class="contenedor contacto" aria-labelledby="titulo-contacto">
+    <h2 id="titulo-contacto">¿Quieres un menú así para tu negocio?</h2>
+    <p>Lo armamos con tus platos y precios, y te entregamos el código QR listo para imprimir.</p>
+    <a class="btn btn-principal" id="wa" href="https://wa.me/50248975506">Quiero un menú QR para mi negocio</a>
+  </section>
+
+  <!-- PIE -->
+
+  <footer>© 2026 Asociación Tecnológica Monterroso | Todos los derechos reservados</footer>
+
+  <!-- Código QR: librería ligera, solo se usa en esta demo -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Lógica del menú -->
+  <script src="../js/demo-menu-qr.js"></script>
+
+</body>
+
+</html>
