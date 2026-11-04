@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Panel privado y carrito: no necesitan aparecer en buscadores
+Disallow: /admin/
+Disallow: /tienda/
+
+Sitemap: https://asociacion-monterroso.pages.dev/sitemap.xml
