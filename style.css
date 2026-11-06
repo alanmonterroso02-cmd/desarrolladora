@@ -203,6 +203,26 @@ footer{
   color:#999;
 }
 
+.footer-enlaces{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:18px;
+  margin-bottom:10px;
+}
+
+footer a{
+  color:#00bfff;
+  text-decoration:none;
+  font-weight:500;
+  transition:0.3s;
+}
+
+footer a:hover{
+  color:#7ddcff;
+  text-decoration:underline;
+}
+
 /* RESPONSIVE */
 
 @media(max-width:768px){
